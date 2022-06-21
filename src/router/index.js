@@ -1,15 +1,15 @@
-import { Route } from "react-router-dom";
-import { Switch } from "react-router-dom";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter, Route, Switch } from "react-router-dom";
 import { paths } from "../constants";
-import App from "../pages/App";
+import { DangNhap } from "../pages";
+import { MainRoute } from "./MainRoute";
 
 export const AppRouter = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Switch>
-        <Route exact path={paths.home} component={App} />
+        <Route exact path={paths.dang_nhap} component={DangNhap} />
+        <Route path={paths.home} component={MainRoute} />
       </Switch>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
