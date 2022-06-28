@@ -1,5 +1,92 @@
-import React from "react";
+import {
+  EditOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import { Row, Space, Input, Table, Avatar, Tag, Tooltip, Button } from "antd";
+import { useRef } from "react";
+import { CaiDatGiaoVien } from "./CaiDatGiaoVien/CaiDatGiaoVien";
 
 export const QlyGiaoVien = () => {
-  return <div>QlyGiaoVien</div>;
+  const ref = useRef();
+
+  const columns = [
+    {
+      title: "",
+      dataIndex: "avatar",
+      width: "1%",
+      render: (data, record) => <Avatar src={data}>{record.name}</Avatar>,
+    },
+    {
+      title: "Họ và tên",
+      dataIndex: "name",
+    },
+    {
+      title: "Giới tính",
+      dataIndex: "quantity_lesson",
+    },
+    {
+      title: "Ngày sinh",
+      dataIndex: "dob",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      render: (data) =>
+        data ? (
+          <Tag color="green">Đang công tác</Tag>
+        ) : (
+          <Tag color="red">Dừng công tác</Tag>
+        ),
+    },
+    {
+      title: "Số khoá học đã tạo",
+      dataIndex: "quantity_course_create",
+    },
+    {
+      title: "",
+      dataIndex: "status",
+      width: "1%",
+      render: (data, record) => (
+        <Space>
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              icon={<EditOutlined />}
+              onClick={() => handleClickChinhSua(record)}
+            ></Button>
+          </Tooltip>
+          <Tooltip title="Đổi trạng thái">
+            <Button icon={<ReloadOutlined />}></Button>
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  const handleClickThemMoi = () => ref.current?.open();
+  const handleClickChinhSua = (record) => ref.current?.open(record);
+
+  return (
+    <div>
+      <Row align="middle" justify="space-between" style={{ marginBottom: 20 }}>
+        <h1 style={{ marginBottom: 0 }}>Quản lý giáo viên</h1>
+
+        <Space>
+          <Input placeholder="Tìm kiếm..." prefix={<SearchOutlined />} />
+          <Button
+            type="primary"
+            onClick={handleClickThemMoi}
+            icon={<PlusOutlined />}
+          >
+            Thêm mới
+          </Button>
+        </Space>
+      </Row>
+
+      <Table columns={columns} dataSource={[1]} size="small" />
+
+      <CaiDatGiaoVien ref={ref} />
+    </div>
+  );
 };

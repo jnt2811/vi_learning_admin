@@ -16,28 +16,32 @@ import {
   Table,
   Tag,
 } from "antd";
-import { useRef } from "react";
+import { getDocs } from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
+import { collections } from "../../constants";
 import { CaiDatKhoaHoc } from "./CaiDatKhoaHoc/CaiDatKhoaHoc";
 
 export const QlyKhoaHoc = () => {
-  const colums = [
+  const columns = [
     {
       title: "Tên khoá học",
-      dataIndex: "name",
+      dataIndex: "title",
     },
     {
       title: "Số lượng bài học",
-      dataIndex: "quantity_lesson",
+      dataIndex: "lessons",
+      render: (data) => data.length,
     },
     {
       title: "Số lượng đăng ký",
       dataIndex: "quantity_subscription",
+      render: () => 0,
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       render: (data) =>
-        data ? (
+        data === "public" ? (
           <Tag color="green">Công khai</Tag>
         ) : (
           <Tag color="red">Riêng tư</Tag>
@@ -74,16 +78,39 @@ export const QlyKhoaHoc = () => {
   ];
 
   const ref = useRef();
+  const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleClickThemMoi = () => ref.current?.open();
   const handleClickChinhSua = (record) => ref.current?.open(record);
   const handleClickXoa = () => {};
 
+  useEffect(() => {
+    getDataSource();
+  }, []);
+
+  const getDataSource = async () => {
+    setDataSource([]);
+    try {
+      setLoading(true);
+      const querySnapshot = await getDocs(collections.courses);
+      querySnapshot.forEach((doc) =>
+        setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }])
+      );
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
   return (
     <div>
       <Row align="middle" justify="space-between" style={{ marginBottom: 20 }}>
-        <Space size={20}>
-          <h1 style={{ marginBottom: 0 }}>Quản lý khoá học</h1>
+        <h1 style={{ marginBottom: 0 }}>Quản lý khoá học</h1>
+
+        <Space>
+          <Input placeholder="Tìm kiếm..." prefix={<SearchOutlined />} />
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -92,15 +119,17 @@ export const QlyKhoaHoc = () => {
             Thêm mới
           </Button>
         </Space>
-
-        <Space>
-          <Input placeholder="Tìm kiếm..." prefix={<SearchOutlined />} />
-        </Space>
       </Row>
 
-      <Table columns={colums} dataSource={[1]} size="small" />
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        size="small"
+        loading={loading}
+        rowKey="id"
+      />
 
-      <CaiDatKhoaHoc ref={ref} />
+      <CaiDatKhoaHoc ref={ref} onSuccess={getDataSource} />
     </div>
   );
 };

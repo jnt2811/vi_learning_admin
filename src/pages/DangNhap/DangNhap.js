@@ -1,14 +1,44 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Form, Input, Layout, Button } from "antd";
+import { Form, Input, Layout, Button, notification } from "antd";
 import { paths } from "../../constants";
 import { useHistory } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 
 export const DangNhap = () => {
   const history = useHistory();
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
-  const handleSubmit = (values) => {
-    console.log("Login submit", values);
-    history.push(paths.home);
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      await login(values.email, values.password);
+      notification.success({
+        placement: "bottomLeft",
+        message: "Đăng nhập thành công",
+        duration: 1,
+      });
+      return history.push(paths.home);
+    } catch (error) {
+      console.log(error);
+      let message = "Đăng nhập thất bại";
+      switch (error.code) {
+        case "auth/user-not-found":
+          message = "Email không chính xác";
+          break;
+        case "auth/wrong-password":
+          message = "Mật khẩu chưa chính xác";
+          break;
+        default:
+          break;
+      }
+      notification.error({
+        placement: "bottomLeft",
+        message,
+      });
+      setLoading(false);
+    }
   };
 
   return (
@@ -20,30 +50,15 @@ export const DangNhap = () => {
       >
         <h1 style={{ textAlign: "center", fontSize: 40 }}>Đăng nhập</h1>
 
-        <Form.Item
-          name="username"
-          rules={[
-            {
-              required: true,
-              message: "Please input your Username!",
-            },
-          ]}
-        >
+        <Form.Item name="email" {...formItemRequired}>
           <Input
             size="large"
             prefix={<UserOutlined />}
             placeholder="Tên đăng nhập"
           />
         </Form.Item>
-        <Form.Item
-          name="password"
-          rules={[
-            {
-              required: true,
-              message: "Please input your Password!",
-            },
-          ]}
-        >
+
+        <Form.Item name="password" {...formItemRequired}>
           <Input
             size="large"
             prefix={<LockOutlined />}
@@ -53,11 +68,26 @@ export const DangNhap = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" block size="large">
+          <Button
+            type="primary"
+            htmlType="submit"
+            block
+            size="large"
+            loading={loading}
+          >
             Đăng nhập
           </Button>
         </Form.Item>
       </Form>
     </Layout>
   );
+};
+
+const formItemRequired = {
+  rules: [
+    {
+      required: true,
+      message: "Hãy nhập đầy đủ thông tin",
+    },
+  ],
 };

@@ -1,4 +1,4 @@
-import { Layout } from "antd";
+import { Layout, Result } from "antd";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { paths } from "../constants";
 import { Header } from "../layouts";
@@ -23,6 +23,11 @@ export const MainRoute = () => {
           <Route exact path={paths.quan_ly_thi_thu} component={QlyThiThu} />
 
           <Redirect exact from={paths.home} to={paths.quan_ly_khoa_hoc} />
+          <Route
+            render={() => (
+              <Result status="404" title="Trang web không tồn tại" />
+            )}
+          />
         </Switch>
       </Layout.Content>
     </Layout>

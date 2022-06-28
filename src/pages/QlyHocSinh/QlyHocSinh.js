@@ -2,7 +2,7 @@ import { InfoCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Tooltip, Row, Space, Input, Table, Avatar } from "antd";
 
 export const QlyHocSinh = () => {
-  const colums = [
+  const columns = [
     {
       title: "",
       dataIndex: "avatar",
@@ -55,7 +55,7 @@ export const QlyHocSinh = () => {
         </Space>
       </Row>
 
-      <Table columns={colums} dataSource={[1]} size="small" />
+      <Table columns={columns} dataSource={[1]} size="small" />
     </div>
   );
 };

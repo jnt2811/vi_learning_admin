@@ -2,6 +2,7 @@ import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { Col, Layout, Menu, Row, Avatar, Dropdown } from "antd";
 import { useHistory } from "react-router-dom";
 import { paths } from "../../constants";
+import { auth } from "../../firebase";
 
 export const Header = () => {
   const history = useHistory();
@@ -26,6 +27,8 @@ export const Header = () => {
   ];
 
   const handleClickMenu = ({ key }) => history.push(key);
+
+  const handleLogout = () => auth.signOut();
 
   return (
     <Layout.Header>
@@ -53,7 +56,9 @@ export const Header = () => {
               <div style={{ width: 150 }}>
                 <Menu>
                   <Menu.Item icon={<UserOutlined />}>Tài khoản</Menu.Item>
-                  <Menu.Item icon={<LogoutOutlined />}>Đăng xuất</Menu.Item>
+                  <Menu.Item icon={<LogoutOutlined />} onClick={handleLogout}>
+                    Đăng xuất
+                  </Menu.Item>
                 </Menu>
               </div>
             }

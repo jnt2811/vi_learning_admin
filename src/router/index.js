@@ -1,15 +1,22 @@
-import { HashRouter, Route, Switch } from "react-router-dom";
+import { HashRouter, Switch } from "react-router-dom";
 import { paths } from "../constants";
+import { AuthProvider } from "../contexts/AuthContext";
+import { ScrollToTop } from "../hooks";
 import { DangNhap } from "../pages";
+import { AuthRoute, PrivateRoute } from "./ConfigRoutes";
 import { MainRoute } from "./MainRoute";
 
 export const AppRouter = () => {
   return (
     <HashRouter>
-      <Switch>
-        <Route exact path={paths.dang_nhap} component={DangNhap} />
-        <Route path={paths.home} component={MainRoute} />
-      </Switch>
+      <AuthProvider>
+        <ScrollToTop />
+
+        <Switch>
+          <AuthRoute exact path={paths.dang_nhap} component={DangNhap} />
+          <PrivateRoute path={paths.home} component={MainRoute} />
+        </Switch>
+      </AuthProvider>
     </HashRouter>
   );
 };

@@ -1,4 +1,4 @@
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import {
   Drawer,
   Row,
@@ -11,14 +11,10 @@ import {
   Divider,
   Upload,
   Form,
-  notification,
 } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { collections, keys } from "../../../constants";
-import { addDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { firestore } from "../../../firebase";
 
-export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
+export const CaiDatGiaoVien = forwardRef((props, ref) => {
   const columns = [
     {
       title: "Tên bài học",
@@ -27,39 +23,18 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
     {
       title: "Link video",
       dataIndex: "link",
-      render: (data) => (
-        <a href={data} target="_blank" rel="noreferrer">
-          {data}
-        </a>
-      ),
     },
     {
       title: "Mô tả",
       dataIndex: "description",
-      ellipsis: true,
-    },
-    {
-      title: "",
-      dataIndex: "",
-      render: (_, record) => (
-        <Button
-          icon={<DeleteOutlined />}
-          type="primary"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleXoaBaihoc(record);
-          }}
-        ></Button>
-      ),
     },
   ];
 
   const [currentData, setCurrentData] = useState();
   const [visible, setVisible] = useState(false);
-  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [loadingSubmit] = useState(false);
   const [formInfoKhoaHoc] = Form.useForm();
   const [formThemBaihoc] = Form.useForm();
-  const [dsBaiHoc, setDsBaiHoc] = useState([]);
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -67,89 +42,23 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
 
   const handleOpen = (data) => {
     setVisible(true);
-    if (data) {
-      setCurrentData(data);
-      formInfoKhoaHoc.setFields(
-        Object.keys(data).map((name) => ({
-          name,
-          value: data[name],
-        }))
-      );
-      setDsBaiHoc(data.lessons);
-    }
+    if (data) setCurrentData(data);
   };
 
   const handleClose = () => {
     setVisible(false);
-    setLoadingSubmit(false);
-    setDsBaiHoc([]);
     setCurrentData();
-    formInfoKhoaHoc.resetFields();
-    formThemBaihoc.resetFields();
   };
 
-  const handleUpdateKhoaHoc = async (values) => {
-    setLoadingSubmit(true);
-    if (!currentData) themMoiKhoaHoc(values);
-    else chinhSuaKhoaHoc(values);
-  };
+  const handleUpdateKhoaHoc = (values) => {};
 
-  const themMoiKhoaHoc = async (values) => {
-    try {
-      const data = {
-        ...values,
-        lessons: dsBaiHoc,
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp(),
-      };
-      await addDoc(collections.courses, data);
-      notification.success({ message: "Thêm mới thành công" });
-      onSuccess();
-      return handleClose();
-    } catch (error) {
-      setLoadingSubmit(false);
-      console.log(error);
-      return notification.error({ message: "Thêm mới thất bại" });
-    }
-  };
-
-  const chinhSuaKhoaHoc = async (values) => {
-    try {
-      const data = {
-        ...values,
-        lessons: dsBaiHoc,
-        updated_at: serverTimestamp(),
-      };
-      const ref = doc(firestore, keys.collection_courses, currentData.id);
-      await updateDoc(ref, data);
-      notification.success({ message: "Chỉnh sửa thành công" });
-      handleClose();
-      return onSuccess();
-    } catch (error) {
-      setLoadingSubmit(false);
-      console.log(error);
-      return notification.error({ message: "Chỉnh sửa thất bại" });
-    }
-  };
-
-  const handleThemBaihoc = (values) => {
-    const exist = dsBaiHoc.some((baiHoc) => baiHoc.title === values.title);
-    if (exist) return notification.error({ message: "Bài học đã tồn tại!" });
-    setDsBaiHoc((curr) => [values, ...curr]);
-    formThemBaihoc.resetFields();
-  };
-
-  const handleXoaBaihoc = (record) => {
-    setDsBaiHoc((curr) => {
-      return curr.filter((baiHoc) => baiHoc.title !== record.title);
-    });
-  };
+  const handleThemBaihoc = (values) => {};
 
   return (
     <Drawer
       width={1000}
       visible={visible}
-      title={`${!currentData ? "Thêm mới" : "Chỉnh sửa"} khoá học`}
+      title={`${!currentData ? "Thêm mới" : "Chỉnh sửa"} giáo viên`}
       onClose={handleClose}
       footer={
         <Row align="middle" justify="end">
@@ -157,11 +66,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
             <Button type="primary" ghost onClick={handleClose}>
               Huỷ bỏ
             </Button>
-            <Button
-              type="primary"
-              loading={loadingSubmit}
-              onClick={() => formInfoKhoaHoc.submit()}
-            >
+            <Button type="primary" loading={loadingSubmit}>
               Cập nhật
             </Button>
           </Space>
@@ -199,12 +104,8 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
               </Col>
 
               <Col span={7}>
-                <Form.Item
-                  label="Trạng thái"
-                  name="status"
-                  initialValue="public"
-                >
-                  <Radio.Group>
+                <Form.Item label="Trạng thái" name="status">
+                  <Radio.Group defaultValue="public">
                     <Space>
                       <Radio value="public">Công khai</Radio>
                       <Radio value="private">Riêng tư</Radio>
@@ -267,7 +168,6 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
           <Col>
             <Button
               type="primary"
-              htmlType="submit"
               style={{ marginTop: 3 }}
               icon={<PlusOutlined />}
             >
@@ -277,12 +177,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Row>
       </Form>
 
-      <Table
-        columns={columns}
-        dataSource={dsBaiHoc}
-        size="small"
-        rowKey="title"
-      />
+      <Table columns={columns} dataSource={[1]} size="small" />
     </Drawer>
   );
 });
