@@ -19,7 +19,7 @@ import {
 import { getDocs } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { collections } from "../../constants";
-import { CaiDatKhoaHoc } from "./CaiDatKhoaHoc/CaiDatKhoaHoc";
+import { CaiDatKhoaHoc } from "./CaiDatKhoaHoc";
 
 export const QlyKhoaHoc = () => {
   const columns = [

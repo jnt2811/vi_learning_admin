@@ -1,25 +1,33 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Form, Input, Layout, Button, notification } from "antd";
-import { paths } from "../../constants";
-import { useHistory } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 
 export const DangNhap = () => {
-  const history = useHistory();
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, getUserInfo, signout } = useAuth();
 
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
-      await login(values.email, values.password);
-      notification.success({
-        placement: "bottomLeft",
-        message: "Đăng nhập thành công",
-        duration: 1,
-      });
-      return history.push(paths.home);
+      const loginRes = await login(values.email, values.password);
+      const infoRes = await getUserInfo(loginRes.user.uid);
+      const isNotAllowed =
+        !infoRes ||
+        (!!infoRes && infoRes.role !== "admin" && infoRes.role !== "teacher");
+      if (isNotAllowed) {
+        signout();
+        notification.error({
+          placement: "bottomLeft",
+          message: "Tài khoản không có quyền truy cập",
+        });
+      } else {
+        notification.success({
+          placement: "bottomLeft",
+          message: "Đăng nhập thành công",
+          duration: 1,
+        });
+      }
     } catch (error) {
       console.log(error);
       let message = "Đăng nhập thất bại";

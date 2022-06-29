@@ -1,5 +1,9 @@
 import { InfoCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Tooltip, Row, Space, Input, Table, Avatar } from "antd";
+import { getDocs, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { collections } from "../../constants";
+import { getShortName } from "../../helpers";
 
 export const QlyHocSinh = () => {
   const columns = [
@@ -7,11 +11,17 @@ export const QlyHocSinh = () => {
       title: "",
       dataIndex: "avatar",
       width: "1%",
-      render: (data, record) => <Avatar src={data}>{record.name}</Avatar>,
+      render: (data, record) => (
+        <Avatar src={data}>{getShortName(record.name)}</Avatar>
+      ),
     },
     {
       title: "Họ và tên",
       dataIndex: "name",
+    },
+    {
+      title: "Giới tính",
+      dataIndex: "gender",
     },
     {
       title: "Ngày sinh",
@@ -20,6 +30,10 @@ export const QlyHocSinh = () => {
     {
       title: "Số điện thoại",
       dataIndex: "phone",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
     },
     {
       title: "Số khoá học đã tham gia",
@@ -43,6 +57,29 @@ export const QlyHocSinh = () => {
     },
   ];
 
+  const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    getDataSource();
+  }, []);
+
+  const getDataSource = async () => {
+    setDataSource([]);
+    try {
+      setLoading(true);
+      const q = query(collections.users, where("role", "==", "student"));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) =>
+        setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }])
+      );
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
   const handleClickViewDetail = (record) => {};
 
   return (
@@ -55,7 +92,13 @@ export const QlyHocSinh = () => {
         </Space>
       </Row>
 
-      <Table columns={columns} dataSource={[1]} size="small" />
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        loading={loading}
+        size="small"
+        rowKey="id"
+      />
     </div>
   );
 };

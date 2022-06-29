@@ -14,9 +14,9 @@ import {
   notification,
 } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { collections, keys } from "../../../constants";
+import { collections, keys } from "../../constants";
 import { addDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { firestore } from "../../../firebase";
+import { firestore } from "../../firebase";
 
 export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   const columns = [
@@ -69,13 +69,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
     setVisible(true);
     if (data) {
       setCurrentData(data);
-      formInfoKhoaHoc.setFields(
-        Object.keys(data).map((name) => ({
-          name,
-          value: data[name],
-        }))
-      );
-      setDsBaiHoc(data.lessons);
+      initData(data);
     }
   };
 
@@ -86,6 +80,16 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
     setCurrentData();
     formInfoKhoaHoc.resetFields();
     formThemBaihoc.resetFields();
+  };
+
+  const initData = (data) => {
+    formInfoKhoaHoc.setFields(
+      Object.keys(data).map((name) => ({
+        name,
+        value: data[name],
+      }))
+    );
+    setDsBaiHoc(data.lessons);
   };
 
   const handleUpdateKhoaHoc = async (values) => {

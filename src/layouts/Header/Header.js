@@ -2,10 +2,12 @@ import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { Col, Layout, Menu, Row, Avatar, Dropdown } from "antd";
 import { useHistory } from "react-router-dom";
 import { paths } from "../../constants";
-import { auth } from "../../firebase";
+import { getShortName } from "../../helpers";
+import { useAuth } from "../../contexts/AuthContext";
 
 export const Header = () => {
   const history = useHistory();
+  const { userInfo, signout } = useAuth();
 
   const items = [
     {
@@ -27,8 +29,6 @@ export const Header = () => {
   ];
 
   const handleClickMenu = ({ key }) => history.push(key);
-
-  const handleLogout = () => auth.signOut();
 
   return (
     <Layout.Header>
@@ -54,17 +54,26 @@ export const Header = () => {
             placement="bottomRight"
             overlay={
               <div style={{ width: 150 }}>
-                <Menu>
-                  <Menu.Item icon={<UserOutlined />}>Tài khoản</Menu.Item>
-                  <Menu.Item icon={<LogoutOutlined />} onClick={handleLogout}>
-                    Đăng xuất
-                  </Menu.Item>
-                </Menu>
+                <Menu
+                  items={[
+                    {
+                      key: 1,
+                      icon: <UserOutlined />,
+                      label: "Tài khoản",
+                    },
+                    {
+                      key: 2,
+                      icon: <LogoutOutlined />,
+                      label: "Đăng xuất",
+                      onClick: signout,
+                    },
+                  ]}
+                />
               </div>
             }
           >
             <Avatar size={35} style={{ cursor: "pointer" }}>
-              Admin
+              {getShortName(userInfo.name)}
             </Avatar>
           </Dropdown>
         </Col>

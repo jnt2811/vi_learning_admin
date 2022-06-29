@@ -5,18 +5,21 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { Row, Space, Input, Table, Avatar, Tag, Tooltip, Button } from "antd";
-import { useRef } from "react";
-import { CaiDatGiaoVien } from "./CaiDatGiaoVien/CaiDatGiaoVien";
+import { getDocs, query, where } from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
+import { collections } from "../../constants";
+import { getShortName } from "../../helpers";
+import { CaiDatGiaoVien } from "./CaiDatGiaoVien";
 
 export const QlyGiaoVien = () => {
-  const ref = useRef();
-
   const columns = [
     {
       title: "",
       dataIndex: "avatar",
       width: "1%",
-      render: (data, record) => <Avatar src={data}>{record.name}</Avatar>,
+      render: (data, record) => (
+        <Avatar src={data}>{getShortName(record.name)}</Avatar>
+      ),
     },
     {
       title: "Họ và tên",
@@ -24,7 +27,7 @@ export const QlyGiaoVien = () => {
     },
     {
       title: "Giới tính",
-      dataIndex: "quantity_lesson",
+      dataIndex: "gender",
     },
     {
       title: "Ngày sinh",
@@ -32,7 +35,7 @@ export const QlyGiaoVien = () => {
     },
     {
       title: "Trạng thái",
-      dataIndex: "status",
+      dataIndex: "on_work",
       render: (data) =>
         data ? (
           <Tag color="green">Đang công tác</Tag>
@@ -43,6 +46,7 @@ export const QlyGiaoVien = () => {
     {
       title: "Số khoá học đã tạo",
       dataIndex: "quantity_course_create",
+      render: (data) => 0,
     },
     {
       title: "",
@@ -64,6 +68,30 @@ export const QlyGiaoVien = () => {
     },
   ];
 
+  const ref = useRef();
+  const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getDataSource();
+  }, []);
+
+  const getDataSource = async () => {
+    setDataSource([]);
+    try {
+      setLoading(true);
+      const q = query(collections.users, where("role", "==", "teacher"));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) =>
+        setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }])
+      );
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
   const handleClickThemMoi = () => ref.current?.open();
   const handleClickChinhSua = (record) => ref.current?.open(record);
 
@@ -84,9 +112,15 @@ export const QlyGiaoVien = () => {
         </Space>
       </Row>
 
-      <Table columns={columns} dataSource={[1]} size="small" />
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        rowKey="id"
+        loading={loading}
+        size="small"
+      />
 
-      <CaiDatGiaoVien ref={ref} />
+      <CaiDatGiaoVien ref={ref} onSuccess={getDataSource} />
     </div>
   );
 };
