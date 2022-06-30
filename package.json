@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
+    "@tinymce/tinymce-react": "^3.14.0",
     "ahooks": "^3.4.0",
     "antd": "^4.21.3",
     "axios": "^0.27.2",
