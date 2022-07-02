@@ -12,6 +12,8 @@ import {
   Upload,
   Form,
   notification,
+  Select,
+  InputNumber,
 } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { collections, keys } from "../../constants";
@@ -24,24 +26,26 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
     {
       title: "Tên câu hỏi",
       dataIndex: "question",
-    },
-    {
-      title: "Link video",
-      dataIndex: "link",
-      render: (data) => (
-        <a href={data} target="_blank" rel="noreferrer">
-          {data}
-        </a>
-      ),
-    },
-    {
-      title: "Mô tả",
-      dataIndex: "description",
       ellipsis: true,
     },
+    // {
+    //   title: "Link video",
+    //   dataIndex: "link",
+    //   render: (data) => (
+    //     <a href={data} target="_blank" rel="noreferrer">
+    //       {data}
+    //     </a>
+    //   ),
+    // },
+    // {
+    //   title: "Mô tả",
+    //   dataIndex: "description",
+    //   ellipsis: true,
+    // },
     {
       title: "",
       dataIndex: "",
+      width: 100,
       render: (_, record) => (
         <Space>
           <Button
@@ -57,6 +61,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
             icon={<DeleteOutlined />}
             type="primary"
             danger
+            ghost
             onClick={(e) => {
               e.stopPropagation();
               handleXoaCauHoi(record);
@@ -191,13 +196,13 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Row>
       }
     >
-      <Row gutter={20}>
+      <Row gutter={20} wrap={false}>
         <Col flex="auto">
           <Form layout="vertical" form={form} onFinish={handleUpdateBaiThi}>
             <h3>Thông tin bài thi</h3>
 
             <Row gutter={10}>
-              <Col span={6}>
+              <Col span={8}>
                 <Form.Item
                   label="Tên bài thi"
                   name="title"
@@ -207,7 +212,35 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
                 </Form.Item>
               </Col>
 
-              <Col span={11}>
+              <Col span={8}>
+                <Form.Item
+                  label="Mức độ"
+                  name="mode"
+                  {...requiredFormItemProps}
+                >
+                  <Select placeholder="Nhập">
+                    <Select.Option value="easy">Dễ</Select.Option>
+                    <Select.Option value="normal">Thường</Select.Option>
+                    <Select.Option value="hard">Khó</Select.Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+
+              <Col span={8}>
+                <Form.Item
+                  label="Thời gian (phút)"
+                  name="time"
+                  {...requiredFormItemProps}
+                >
+                  <InputNumber
+                    placeholder="Nhập"
+                    min={0}
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col span={16}>
                 <Form.Item
                   label="Mô tả"
                   name="description"
@@ -217,7 +250,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
                 </Form.Item>
               </Col>
 
-              <Col span={7}>
+              <Col span={8}>
                 <Form.Item
                   label="Trạng thái"
                   name="status"

@@ -28,6 +28,16 @@ export const QlyThiThu = () => {
       dataIndex: "title",
     },
     {
+      title: "Mức độ",
+      dataIndex: "mode",
+      render: (data) =>
+        data === "easy" ? "Dễ" : data === "normal" ? "Thường" : "Khó",
+    },
+    {
+      title: "Thời gian (phút)",
+      dataIndex: "time",
+    },
+    {
       title: "Số lượng câu hỏi",
       dataIndex: "questions",
       render: (data) => data.length,
