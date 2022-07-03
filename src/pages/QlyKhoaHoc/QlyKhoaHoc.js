@@ -30,7 +30,7 @@ export const QlyKhoaHoc = () => {
     {
       title: "Số lượng bài học",
       dataIndex: "lessons",
-      render: (data) => data.length,
+      render: (data) => (data ? data.length : 0),
     },
     {
       title: "Số lượng đăng ký",
@@ -59,11 +59,13 @@ export const QlyKhoaHoc = () => {
               onClick={() => handleClickChinhSua(record)}
             ></Button>
           </Tooltip>
+
           <Tooltip title={`Chuyển sang "${data ? "Riêng tư" : "Công khai"}"`}>
             <Button
               icon={data ? <EyeInvisibleOutlined /> : <EyeOutlined />}
             ></Button>
           </Tooltip>
+
           <Tooltip title="Xoá">
             <Popconfirm
               title="Xoá khoá học"
