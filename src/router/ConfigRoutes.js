@@ -24,11 +24,7 @@ export const PrivateRoute = ({ component: Component, ...remainingProps }) => {
     <Route
       {...remainingProps}
       render={(props) => {
-        return isAuth ? (
-          <Component {...props} />
-        ) : (
-          <Redirect to={paths.dang_nhap} />
-        );
+        return isAuth ? <Component {...props} /> : <Redirect to={paths.dang_nhap} />;
       }}
     />
   );

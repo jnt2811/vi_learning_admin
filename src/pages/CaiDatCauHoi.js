@@ -1,7 +1,7 @@
 import { Button, Col, Drawer, Form, Input, Radio, Row, Space } from "antd";
 import { nanoid } from "nanoid";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
-import { TextEditor } from "../../components";
+import { TextEditor } from "../components";
 
 export const CaiDatCauHoi = forwardRef(({ onSuccess }, ref) => {
   const [visible, setVisible] = useState(false);

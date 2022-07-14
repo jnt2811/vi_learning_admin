@@ -1,24 +1,8 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Tooltip,
-  Popconfirm,
-  Row,
-  Space,
-  Input,
-  Table,
-  Tag,
-} from "antd";
+import { DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Tooltip, Popconfirm, Row, Space, Input, Table, Tag } from "antd";
 import { getDocs } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
-import { collections } from "../../constants";
+import { collections } from "../constants";
 import { CaiDatKhoaHoc } from "./CaiDatKhoaHoc";
 
 export const QlyKhoaHoc = () => {
@@ -40,12 +24,7 @@ export const QlyKhoaHoc = () => {
     {
       title: "Trạng thái",
       dataIndex: "status",
-      render: (data) =>
-        data === "public" ? (
-          <Tag color="green">Công khai</Tag>
-        ) : (
-          <Tag color="red">Riêng tư</Tag>
-        ),
+      render: (data) => (data === "public" ? <Tag color="green">Công khai</Tag> : <Tag color="red">Riêng tư</Tag>),
     },
     {
       title: "",
@@ -54,23 +33,15 @@ export const QlyKhoaHoc = () => {
       render: (data, record) => (
         <Space>
           <Tooltip title="Chỉnh sửa">
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => handleClickChinhSua(record)}
-            ></Button>
+            <Button icon={<EditOutlined />} onClick={() => handleClickChinhSua(record)}></Button>
           </Tooltip>
 
           <Tooltip title={`Chuyển sang "${data ? "Riêng tư" : "Công khai"}"`}>
-            <Button
-              icon={data ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-            ></Button>
+            <Button icon={data ? <EyeInvisibleOutlined /> : <EyeOutlined />}></Button>
           </Tooltip>
 
           <Tooltip title="Xoá">
-            <Popconfirm
-              title="Xoá khoá học"
-              onConfirm={() => handleClickXoa(record)}
-            >
+            <Popconfirm title="Xoá khoá học" onConfirm={() => handleClickXoa(record)}>
               <Button icon={<DeleteOutlined />}></Button>
             </Popconfirm>
           </Tooltip>
@@ -96,9 +67,7 @@ export const QlyKhoaHoc = () => {
     try {
       setLoading(true);
       const querySnapshot = await getDocs(collections.courses);
-      querySnapshot.forEach((doc) =>
-        setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }])
-      );
+      querySnapshot.forEach((doc) => setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }]));
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -113,23 +82,13 @@ export const QlyKhoaHoc = () => {
 
         <Space>
           <Input placeholder="Tìm kiếm..." prefix={<SearchOutlined />} />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleClickThemMoi}
-          >
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleClickThemMoi}>
             Thêm mới
           </Button>
         </Space>
       </Row>
 
-      <Table
-        columns={columns}
-        dataSource={dataSource}
-        size="small"
-        loading={loading}
-        rowKey="id"
-      />
+      <Table columns={columns} dataSource={dataSource} size="small" loading={loading} rowKey="id" />
 
       <CaiDatKhoaHoc ref={ref} onSuccess={getDataSource} />
     </div>

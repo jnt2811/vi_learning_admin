@@ -1,14 +1,10 @@
-import {
-  EditOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Row, Space, Input, Table, Avatar, Tag, Tooltip, Button } from "antd";
 import { getDocs, query, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
-import { collections } from "../../constants";
-import { getShortName } from "../../helpers";
+import { useQuery } from "react-query";
+import { apis, collections } from "../constants";
+import { apiClient, getShortName } from "../helpers";
 import { CaiDatGiaoVien } from "./CaiDatGiaoVien";
 
 export const QlyGiaoVien = () => {
@@ -17,9 +13,7 @@ export const QlyGiaoVien = () => {
       title: "",
       dataIndex: "avatar",
       width: "1%",
-      render: (data, record) => (
-        <Avatar src={data}>{getShortName(record.name)}</Avatar>
-      ),
+      render: (data, record) => <Avatar src={data}>{getShortName(record.name)}</Avatar>,
     },
     {
       title: "Họ và tên",
@@ -36,12 +30,7 @@ export const QlyGiaoVien = () => {
     {
       title: "Trạng thái",
       dataIndex: "on_work",
-      render: (data) =>
-        data ? (
-          <Tag color="green">Đang công tác</Tag>
-        ) : (
-          <Tag color="red">Dừng công tác</Tag>
-        ),
+      render: (data) => (data ? <Tag color="green">Đang công tác</Tag> : <Tag color="red">Dừng công tác</Tag>),
     },
     {
       title: "Số khoá học đã tạo",
@@ -55,10 +44,7 @@ export const QlyGiaoVien = () => {
       render: (data, record) => (
         <Space>
           <Tooltip title="Chỉnh sửa">
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => handleClickChinhSua(record)}
-            ></Button>
+            <Button icon={<EditOutlined />} onClick={() => handleClickChinhSua(record)}></Button>
           </Tooltip>
           <Tooltip title="Đổi trạng thái">
             <Button icon={<ReloadOutlined />}></Button>
@@ -80,11 +66,8 @@ export const QlyGiaoVien = () => {
     setDataSource([]);
     try {
       setLoading(true);
-      const q = query(collections.users, where("role", "==", "teacher"));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) =>
-        setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }])
-      );
+      const { data } = await apiClient.get(apis.get_all_users);
+      console.log(data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -102,23 +85,13 @@ export const QlyGiaoVien = () => {
 
         <Space>
           <Input placeholder="Tìm kiếm..." prefix={<SearchOutlined />} />
-          <Button
-            type="primary"
-            onClick={handleClickThemMoi}
-            icon={<PlusOutlined />}
-          >
+          <Button type="primary" onClick={handleClickThemMoi} icon={<PlusOutlined />}>
             Thêm mới
           </Button>
         </Space>
       </Row>
 
-      <Table
-        columns={columns}
-        dataSource={dataSource}
-        rowKey="id"
-        loading={loading}
-        size="small"
-      />
+      <Table columns={columns} dataSource={dataSource} rowKey="id" loading={loading} size="small" />
 
       <CaiDatGiaoVien ref={ref} onSuccess={getDataSource} />
     </div>

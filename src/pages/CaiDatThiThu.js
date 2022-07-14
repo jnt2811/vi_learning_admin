@@ -1,24 +1,9 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import {
-  Drawer,
-  Row,
-  Space,
-  Button,
-  Table,
-  Col,
-  Input,
-  Radio,
-  Divider,
-  Upload,
-  Form,
-  notification,
-  Select,
-  InputNumber,
-} from "antd";
+import { Drawer, Row, Space, Button, Table, Col, Input, Radio, Divider, Upload, Form, notification, Select, InputNumber } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import { collections, keys } from "../../constants";
+import { collections, keys } from "../constants";
 import { addDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { firestore } from "../../firebase";
+import { firestore } from "../firebase";
 import { CaiDatCauHoi } from "./CaiDatCauHoi";
 
 export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
@@ -185,11 +170,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
               Huỷ bỏ
             </Button>
 
-            <Button
-              type="primary"
-              loading={loadingSubmit}
-              onClick={() => form.submit()}
-            >
+            <Button type="primary" loading={loadingSubmit} onClick={() => form.submit()}>
               Cập nhật
             </Button>
           </Space>
@@ -203,21 +184,13 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
 
             <Row gutter={10}>
               <Col span={8}>
-                <Form.Item
-                  label="Tên bài thi"
-                  name="title"
-                  {...requiredFormItemProps}
-                >
+                <Form.Item label="Tên bài thi" name="title" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
 
               <Col span={8}>
-                <Form.Item
-                  label="Mức độ"
-                  name="mode"
-                  {...requiredFormItemProps}
-                >
+                <Form.Item label="Mức độ" name="mode" {...requiredFormItemProps}>
                   <Select placeholder="Nhập">
                     <Select.Option value="easy">Dễ</Select.Option>
                     <Select.Option value="normal">Thường</Select.Option>
@@ -227,35 +200,19 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
               </Col>
 
               <Col span={8}>
-                <Form.Item
-                  label="Thời gian (phút)"
-                  name="time"
-                  {...requiredFormItemProps}
-                >
-                  <InputNumber
-                    placeholder="Nhập"
-                    min={0}
-                    style={{ width: "100%" }}
-                  />
+                <Form.Item label="Thời gian (phút)" name="time" {...requiredFormItemProps}>
+                  <InputNumber placeholder="Nhập" min={0} style={{ width: "100%" }} />
                 </Form.Item>
               </Col>
 
               <Col span={16}>
-                <Form.Item
-                  label="Mô tả"
-                  name="description"
-                  {...requiredFormItemProps}
-                >
+                <Form.Item label="Mô tả" name="description" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
 
               <Col span={8}>
-                <Form.Item
-                  label="Trạng thái"
-                  name="status"
-                  initialValue="public"
-                >
+                <Form.Item label="Trạng thái" name="status" initialValue="public">
                   <Radio.Group>
                     <Space>
                       <Radio value="public">Công khai</Radio>
@@ -287,12 +244,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Button>
       </Row>
 
-      <Table
-        columns={columns}
-        dataSource={dsCauHoi}
-        size="small"
-        rowKey="key"
-      />
+      <Table columns={columns} dataSource={dsCauHoi} size="small" rowKey="key" />
 
       <CaiDatCauHoi ref={cauHoiRef} onSuccess={handleCaiDatCauHoi} />
     </Drawer>

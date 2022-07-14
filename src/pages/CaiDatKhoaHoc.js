@@ -1,22 +1,9 @@
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import {
-  Drawer,
-  Row,
-  Space,
-  Button,
-  Table,
-  Col,
-  Input,
-  Radio,
-  Divider,
-  Upload,
-  Form,
-  notification,
-} from "antd";
+import { Drawer, Row, Space, Button, Table, Col, Input, Radio, Divider, Upload, Form, notification } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { collections, keys } from "../../constants";
+import { collections, keys } from "../constants";
 import { addDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { firestore } from "../../firebase";
+import { firestore } from "../firebase";
 
 export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   const columns = [
@@ -161,11 +148,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
             <Button type="primary" ghost onClick={handleClose}>
               Huỷ bỏ
             </Button>
-            <Button
-              type="primary"
-              loading={loadingSubmit}
-              onClick={() => formInfoKhoaHoc.submit()}
-            >
+            <Button type="primary" loading={loadingSubmit} onClick={() => formInfoKhoaHoc.submit()}>
               Cập nhật
             </Button>
           </Space>
@@ -174,40 +157,24 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
     >
       <Row gutter={20}>
         <Col flex="auto">
-          <Form
-            layout="vertical"
-            form={formInfoKhoaHoc}
-            onFinish={handleUpdateKhoaHoc}
-          >
+          <Form layout="vertical" form={formInfoKhoaHoc} onFinish={handleUpdateKhoaHoc}>
             <h3>Thông tin khoá học</h3>
 
             <Row gutter={10}>
               <Col span={6}>
-                <Form.Item
-                  label="Tên khoá học"
-                  name="title"
-                  {...requiredFormItemProps}
-                >
+                <Form.Item label="Tên khoá học" name="title" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
 
               <Col span={11}>
-                <Form.Item
-                  label="Mô tả"
-                  name="description"
-                  {...requiredFormItemProps}
-                >
+                <Form.Item label="Mô tả" name="description" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
 
               <Col span={7}>
-                <Form.Item
-                  label="Trạng thái"
-                  name="status"
-                  initialValue="public"
-                >
+                <Form.Item label="Trạng thái" name="status" initialValue="public">
                   <Radio.Group>
                     <Space>
                       <Radio value="public">Công khai</Radio>
@@ -239,29 +206,17 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
           <Col flex="auto">
             <Row gutter={10}>
               <Col span={6}>
-                <Form.Item
-                  label="Tên bài học"
-                  name="title"
-                  {...requiredFormItemProps}
-                >
+                <Form.Item label="Tên bài học" name="title" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
               <Col span={6}>
-                <Form.Item
-                  label="Link video"
-                  name="link"
-                  {...requiredFormItemProps}
-                >
+                <Form.Item label="Link video" name="link" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item
-                  label="Mô tả"
-                  name="description"
-                  {...requiredFormItemProps}
-                >
+                <Form.Item label="Mô tả" name="description" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
@@ -269,24 +224,14 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
           </Col>
 
           <Col>
-            <Button
-              type="primary"
-              htmlType="submit"
-              style={{ marginTop: 3 }}
-              icon={<PlusOutlined />}
-            >
+            <Button type="primary" htmlType="submit" style={{ marginTop: 3 }} icon={<PlusOutlined />}>
               Thêm
             </Button>
           </Col>
         </Row>
       </Form>
 
-      <Table
-        columns={columns}
-        dataSource={dsBaiHoc}
-        size="small"
-        rowKey="title"
-      />
+      <Table columns={columns} dataSource={dsBaiHoc} size="small" rowKey="title" />
     </Drawer>
   );
 });

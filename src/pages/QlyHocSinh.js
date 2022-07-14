@@ -2,8 +2,8 @@ import { InfoCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Tooltip, Row, Space, Input, Table, Avatar } from "antd";
 import { getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { collections } from "../../constants";
-import { getShortName } from "../../helpers";
+import { collections } from "../constants";
+import { getShortName } from "../helpers";
 
 export const QlyHocSinh = () => {
   const columns = [
@@ -11,9 +11,7 @@ export const QlyHocSinh = () => {
       title: "",
       dataIndex: "avatar",
       width: "1%",
-      render: (data, record) => (
-        <Avatar src={data}>{getShortName(record.name)}</Avatar>
-      ),
+      render: (data, record) => <Avatar src={data}>{getShortName(record.name)}</Avatar>,
     },
     {
       title: "Họ và tên",
@@ -46,11 +44,7 @@ export const QlyHocSinh = () => {
       render: (_, record) => (
         <Space>
           <Tooltip title="Xem chi tiết">
-            <Button
-              disabled
-              icon={<InfoCircleOutlined />}
-              onClick={() => handleClickViewDetail(record)}
-            ></Button>
+            <Button disabled icon={<InfoCircleOutlined />} onClick={() => handleClickViewDetail(record)}></Button>
           </Tooltip>
         </Space>
       ),
@@ -70,9 +64,7 @@ export const QlyHocSinh = () => {
       setLoading(true);
       const q = query(collections.users, where("role", "==", "student"));
       const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) =>
-        setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }])
-      );
+      querySnapshot.forEach((doc) => setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }]));
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -92,13 +84,7 @@ export const QlyHocSinh = () => {
         </Space>
       </Row>
 
-      <Table
-        columns={columns}
-        dataSource={dataSource}
-        loading={loading}
-        size="small"
-        rowKey="id"
-      />
+      <Table columns={columns} dataSource={dataSource} loading={loading} size="small" rowKey="id" />
     </div>
   );
 };

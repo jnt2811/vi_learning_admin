@@ -1,24 +1,8 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Tooltip,
-  Popconfirm,
-  Row,
-  Space,
-  Input,
-  Table,
-  Tag,
-} from "antd";
+import { DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Tooltip, Popconfirm, Row, Space, Input, Table, Tag } from "antd";
 import { getDocs } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
-import { collections } from "../../constants";
+import { collections } from "../constants";
 import { CaiDatThiThu } from "./CaiDatThiThu";
 
 export const QlyThiThu = () => {
@@ -30,8 +14,7 @@ export const QlyThiThu = () => {
     {
       title: "Mức độ",
       dataIndex: "mode",
-      render: (data) =>
-        data === "easy" ? "Dễ" : data === "normal" ? "Thường" : "Khó",
+      render: (data) => (data === "easy" ? "Dễ" : data === "normal" ? "Thường" : "Khó"),
     },
     {
       title: "Thời gian (phút)",
@@ -55,12 +38,7 @@ export const QlyThiThu = () => {
     {
       title: "Trạng thái",
       dataIndex: "status",
-      render: (data) =>
-        data === "public" ? (
-          <Tag color="green">Công khai</Tag>
-        ) : (
-          <Tag color="red">Riêng tư</Tag>
-        ),
+      render: (data) => (data === "public" ? <Tag color="green">Công khai</Tag> : <Tag color="red">Riêng tư</Tag>),
     },
     {
       title: "",
@@ -69,21 +47,13 @@ export const QlyThiThu = () => {
       render: (data, record) => (
         <Space>
           <Tooltip title="Chỉnh sửa">
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => handleClickChinhSua(record)}
-            ></Button>
+            <Button icon={<EditOutlined />} onClick={() => handleClickChinhSua(record)}></Button>
           </Tooltip>
           <Tooltip title={`Chuyển sang "${data ? "Riêng tư" : "Công khai"}"`}>
-            <Button
-              icon={data ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-            ></Button>
+            <Button icon={data ? <EyeInvisibleOutlined /> : <EyeOutlined />}></Button>
           </Tooltip>
           <Tooltip title="Xoá">
-            <Popconfirm
-              title="Xoá khoá học"
-              onConfirm={() => handleClickXoa(record)}
-            >
+            <Popconfirm title="Xoá khoá học" onConfirm={() => handleClickXoa(record)}>
               <Button icon={<DeleteOutlined />}></Button>
             </Popconfirm>
           </Tooltip>
@@ -109,9 +79,7 @@ export const QlyThiThu = () => {
     try {
       setLoading(true);
       const querySnapshot = await getDocs(collections.tests);
-      querySnapshot.forEach((doc) =>
-        setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }])
-      );
+      querySnapshot.forEach((doc) => setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }]));
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -126,23 +94,13 @@ export const QlyThiThu = () => {
 
         <Space>
           <Input placeholder="Tìm kiếm..." prefix={<SearchOutlined />} />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleClickThemMoi}
-          >
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleClickThemMoi}>
             Thêm mới
           </Button>
         </Space>
       </Row>
 
-      <Table
-        columns={columns}
-        dataSource={dataSource}
-        size="small"
-        loading={loading}
-        rowKey="id"
-      />
+      <Table columns={columns} dataSource={dataSource} size="small" loading={loading} rowKey="id" />
 
       <CaiDatThiThu ref={ref} onSuccess={getDataSource} />
     </div>

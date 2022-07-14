@@ -1,24 +1,11 @@
 import { PlusOutlined } from "@ant-design/icons";
-import {
-  Drawer,
-  Row,
-  Space,
-  Button,
-  Col,
-  Input,
-  Upload,
-  Form,
-  Checkbox,
-  Select,
-  DatePicker,
-  notification,
-} from "antd";
+import { Drawer, Row, Space, Button, Col, Input, Upload, Form, Checkbox, Select, DatePicker, notification } from "antd";
 import { doc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { keys } from "../../constants";
-import { firestore } from "../../firebase";
-import { useAuth } from "../../contexts/AuthContext";
-import { handleAuthError } from "../../helpers";
+import { keys } from "../constants";
+import { firestore } from "../firebase";
+import { useAuth } from "../contexts/AuthContext";
+import { handleAuthError } from "../helpers";
 import moment from "moment";
 
 export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
@@ -121,11 +108,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
             <Button type="primary" ghost onClick={handleClose}>
               Huỷ bỏ
             </Button>
-            <Button
-              type="primary"
-              loading={loadingSubmit}
-              onClick={() => form.submit()}
-            >
+            <Button type="primary" loading={loadingSubmit} onClick={() => form.submit()}>
               Cập nhật
             </Button>
           </Space>
@@ -152,11 +135,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
           </Col>
 
           <Col span={8}>
-            <Form.Item
-              label="Giới tính"
-              name="gender"
-              {...requiredFormItemProps}
-            >
+            <Form.Item label="Giới tính" name="gender" {...requiredFormItemProps}>
               <Select placeholder="Chọn" style={{ width: "100%" }}>
                 <Select.Option value="Nam">Nam</Select.Option>
                 <Select.Option value="Nữ">Nữ</Select.Option>
@@ -167,20 +146,12 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
 
           <Col span={8}>
             <Form.Item label="Ngày sinh" name="dob" {...requiredFormItemProps}>
-              <DatePicker
-                placeholder="DD/MM/YYYY"
-                format="DD/MM/YYYY"
-                style={{ width: "100%" }}
-              />
+              <DatePicker placeholder="DD/MM/YYYY" format="DD/MM/YYYY" style={{ width: "100%" }} />
             </Form.Item>
           </Col>
 
           <Col span={8}>
-            <Form.Item
-              label="Số điện thoại"
-              name="phone"
-              {...requiredFormItemProps}
-            >
+            <Form.Item label="Số điện thoại" name="phone" {...requiredFormItemProps}>
               <Input placeholder="Nhập" />
             </Form.Item>
           </Col>
@@ -192,21 +163,13 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
           </Col>
 
           <Col span={8}>
-            <Form.Item
-              label="Địa chỉ"
-              name="address"
-              {...requiredFormItemProps}
-            >
+            <Form.Item label="Địa chỉ" name="address" {...requiredFormItemProps}>
               <Input placeholder="Nhập" />
             </Form.Item>
           </Col>
 
           <Col span={8}>
-            <Form.Item
-              name="on_work"
-              initialValue={true}
-              valuePropName="checked"
-            >
+            <Form.Item name="on_work" initialValue={true} valuePropName="checked">
               <Checkbox defaultChecked>Đang công tác</Checkbox>
             </Form.Item>
           </Col>

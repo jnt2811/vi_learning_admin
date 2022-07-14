@@ -1,4 +1,18 @@
 import { notification } from "antd";
+import axios from "axios";
+import { keys } from "./constants";
+
+const getAccessToken = () => {
+  return localStorage.getItem(keys.ACCESS_TOKEN) || "";
+};
+
+export const apiClient = axios.create({
+  baseURL: "https://15ea-123-16-153-132.ap.ngrok.io/api",
+  headers: {
+    "Content-type": "application/json",
+    Authorization: `Bearer ${getAccessToken()}`,
+  },
+});
 
 export const handleAuthError = (error) => {
   const errorCode = error.code;

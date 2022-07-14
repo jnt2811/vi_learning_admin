@@ -7,28 +7,14 @@ import { useAuth } from "../../contexts/AuthContext";
 
 export const Header = () => {
   const history = useHistory();
-  const { userInfo, signout } = useAuth();
-
-  const items = [
-    {
-      key: paths.quan_ly_khoa_hoc,
-      label: "Quản lý khoá học",
-    },
-    {
-      key: paths.quan_ly_giao_vien,
-      label: "Quản lý giáo viên",
-    },
-    {
-      key: paths.quan_ly_thi_thu,
-      label: "Quản lý thi thử",
-    },
-    {
-      key: paths.quan_ly_hoc_sinh,
-      label: "Quản lý học sinh",
-    },
-  ];
+  const { currentUser, setCurrentUser } = useAuth();
 
   const handleClickMenu = ({ key }) => history.push(key);
+
+  const handleLogout = () => {
+    setCurrentUser();
+    localStorage.clear();
+  };
 
   return (
     <Layout.Header>
@@ -37,13 +23,7 @@ export const Header = () => {
           <Row align="middle" gutter={20}>
             <Col style={{ fontSize: 30, color: "white" }}>LOGO</Col>
             <Col flex="auto">
-              <Menu
-                mode="horizontal"
-                theme="dark"
-                items={items}
-                onClick={handleClickMenu}
-                defaultSelectedKeys={[items[0].key]}
-              />
+              <Menu mode="horizontal" theme="dark" items={items} onClick={handleClickMenu} defaultSelectedKeys={[items[0].key]} />
             </Col>
           </Row>
         </Col>
@@ -65,7 +45,7 @@ export const Header = () => {
                       key: 2,
                       icon: <LogoutOutlined />,
                       label: "Đăng xuất",
-                      onClick: signout,
+                      onClick: handleLogout,
                     },
                   ]}
                 />
@@ -73,7 +53,7 @@ export const Header = () => {
             }
           >
             <Avatar size={35} style={{ cursor: "pointer" }}>
-              {getShortName(userInfo.name)}
+              {getShortName(currentUser?.lastName + " " + currentUser?.firstName)}
             </Avatar>
           </Dropdown>
         </Col>
@@ -81,3 +61,22 @@ export const Header = () => {
     </Layout.Header>
   );
 };
+
+const items = [
+  {
+    key: paths.quan_ly_khoa_hoc,
+    label: "Quản lý khoá học",
+  },
+  {
+    key: paths.quan_ly_giao_vien,
+    label: "Quản lý giáo viên",
+  },
+  {
+    key: paths.quan_ly_thi_thu,
+    label: "Quản lý thi thử",
+  },
+  {
+    key: paths.quan_ly_hoc_sinh,
+    label: "Quản lý học sinh",
+  },
+];
