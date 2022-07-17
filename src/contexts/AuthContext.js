@@ -15,11 +15,11 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (localUser) {
-      setLoading(false);
       const parsedUser = JSON.parse(localUser);
       setCurrentUser(parsedUser);
       console.log("user info", parsedUser);
     }
+    setLoading(false);
   }, [localUser]);
 
   const value = {
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {loading || !currentUser ? (
+      {loading ? (
         <Spin spinning={true} tip="Loading...">
           <div style={{ width: "100vw", height: "100vh" }}></div>
         </Spin>

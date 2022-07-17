@@ -7,7 +7,7 @@ const getAccessToken = () => {
 };
 
 export const apiClient = axios.create({
-  baseURL: "https://15ea-123-16-153-132.ap.ngrok.io/api",
+  baseURL: "https://a6e9-123-16-146-8.ap.ngrok.io",
   headers: {
     "Content-type": "application/json",
     Authorization: `Bearer ${getAccessToken()}`,
