@@ -6,4 +6,5 @@ export const paths = {
   quan_ly_hoc_sinh: "/quan-ly-hoc-sinh",
   quan_ly_khoa_hoc: "/quan-ly-khoa-hoc",
   quan_ly_thi_thu: "/quan-ly-thi-thu",
+  quan_ly_sach: "/quan-ly-sach",
 };

@@ -23,7 +23,13 @@ export const Header = () => {
           <Row align="middle" gutter={20}>
             <Col style={{ fontSize: 30, color: "white" }}>LOGO</Col>
             <Col flex="auto">
-              <Menu mode="horizontal" theme="dark" items={items} onClick={handleClickMenu} defaultSelectedKeys={[items[0].key]} />
+              <Menu
+                mode="horizontal"
+                theme="dark"
+                items={items}
+                onClick={handleClickMenu}
+                defaultSelectedKeys={[items[0].key]}
+              />
             </Col>
           </Row>
         </Col>
@@ -53,7 +59,9 @@ export const Header = () => {
             }
           >
             <Avatar size={35} style={{ cursor: "pointer" }}>
-              {getShortName(currentUser?.lastName + " " + currentUser?.firstName)}
+              {getShortName(
+                currentUser?.lastName + " " + currentUser?.firstName
+              )}
             </Avatar>
           </Dropdown>
         </Col>
@@ -78,5 +86,9 @@ const items = [
   {
     key: paths.quan_ly_hoc_sinh,
     label: "Quản lý học sinh",
+  },
+  {
+    key: paths.quan_ly_sach,
+    label: "Quản lý sách",
   },
 ];
