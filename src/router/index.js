@@ -1,4 +1,4 @@
-import { HashRouter, Switch } from "react-router-dom";
+import { BrowserRouter, Switch } from "react-router-dom";
 import { paths } from "../constants";
 import { AuthProvider } from "../contexts/AuthContext";
 import { ScrollToTop } from "../hooks";
@@ -8,7 +8,7 @@ import { MainRoute } from "./MainRoute";
 
 export const AppRouter = () => {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <AuthProvider>
         <ScrollToTop />
 
@@ -17,6 +17,6 @@ export const AppRouter = () => {
           <PrivateRoute path={paths.home} component={MainRoute} />
         </Switch>
       </AuthProvider>
-    </HashRouter>
+    </BrowserRouter>
   );
 };
