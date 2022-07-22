@@ -1,9 +1,7 @@
 import { EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Row, Space, Input, Table, Avatar, Tag, Tooltip, Button } from "antd";
-import { getDocs, query, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "react-query";
-import { apis, collections } from "../constants";
+import { apis } from "../constants";
 import { apiClient, getShortName } from "../helpers";
 import { CaiDatGiaoVien } from "./CaiDatGiaoVien";
 
@@ -30,7 +28,8 @@ export const QlyGiaoVien = () => {
     {
       title: "Trạng thái",
       dataIndex: "on_work",
-      render: (data) => (data ? <Tag color="green">Đang công tác</Tag> : <Tag color="red">Dừng công tác</Tag>),
+      render: (data) =>
+        data ? <Tag color="green">Đang công tác</Tag> : <Tag color="red">Dừng công tác</Tag>,
     },
     {
       title: "Số khoá học đã tạo",

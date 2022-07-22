@@ -1,5 +1,18 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Drawer, Row, Space, Button, Col, Input, Upload, Form, Checkbox, Select, DatePicker, notification } from "antd";
+import {
+  Drawer,
+  Row,
+  Space,
+  Button,
+  Col,
+  Input,
+  Upload,
+  Form,
+  Checkbox,
+  Select,
+  DatePicker,
+  notification,
+} from "antd";
 import { doc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { keys } from "../constants";
@@ -115,7 +128,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Row>
       }
     >
-      <Row justify="center">
+      {/* <Row justify="center">
         <Col>
           <Upload maxCount={1} listType="picture-card" showUploadList={false}>
             <div>
@@ -124,7 +137,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
             </div>
           </Upload>
         </Col>
-      </Row>
+      </Row> */}
 
       <Form layout="vertical" form={form} onFinish={onFinish}>
         <Row gutter={10} align="bottom">
