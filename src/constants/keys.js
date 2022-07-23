@@ -6,4 +6,7 @@ export const keys = {
   ACCESS_TOKEN: "access_token",
   REFRESH_TOKEN: "refresh_token",
   USER_INFO: "user_info",
+
+  ROLE_ADMIN: "admin",
+  ROLE_TEACHER: "teacher",
 };

@@ -1,9 +1,10 @@
 import { InfoCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Tooltip, Row, Space, Input, Table, Avatar } from "antd";
+import axios from "axios";
 import { getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { collections } from "../constants";
-import { getShortName } from "../helpers";
+import { apis, collections } from "../constants";
+import { apiClient, getShortName, getAccessToken } from "../helpers";
 
 export const QlyHocSinh = () => {
   const columns = [
@@ -44,7 +45,11 @@ export const QlyHocSinh = () => {
       render: (_, record) => (
         <Space>
           <Tooltip title="Xem chi tiết">
-            <Button disabled icon={<InfoCircleOutlined />} onClick={() => handleClickViewDetail(record)}></Button>
+            <Button
+              disabled
+              icon={<InfoCircleOutlined />}
+              onClick={() => handleClickViewDetail(record)}
+            ></Button>
           </Tooltip>
         </Space>
       ),
@@ -62,9 +67,16 @@ export const QlyHocSinh = () => {
     setDataSource([]);
     try {
       setLoading(true);
-      const q = query(collections.users, where("role", "==", "student"));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }]));
+      // const res = await apiClient.get(apis.get_all_users);
+      const res = await axios({
+        method: "get",
+        url: apis.get_all_users,
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${getAccessToken()}`,
+        },
+      });
+      console.log(res);
       setLoading(false);
     } catch (error) {
       setLoading(false);

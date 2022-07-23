@@ -2,14 +2,18 @@ import { notification } from "antd";
 import axios from "axios";
 import { keys } from "./constants";
 
-const getAccessToken = () => {
+export const getAccessToken = () => {
+  console.log(localStorage.getItem(keys.ACCESS_TOKEN));
   return localStorage.getItem(keys.ACCESS_TOKEN) || "";
 };
 
 export const apiClient = axios.create({
-  baseURL: "https://726b-123-16-146-8.ap.ngrok.io/api",
+  baseURL: "http://localhost:8088/api",
   headers: {
-    "Content-type": "application/json",
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    mode: "no-cors",
     Authorization: `Bearer ${getAccessToken()}`,
   },
 });

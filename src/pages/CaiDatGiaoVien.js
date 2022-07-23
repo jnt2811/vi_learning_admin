@@ -1,4 +1,3 @@
-import { PlusOutlined } from "@ant-design/icons";
 import {
   Drawer,
   Row,
@@ -6,23 +5,18 @@ import {
   Button,
   Col,
   Input,
-  Upload,
   Form,
-  Checkbox,
   Select,
   DatePicker,
   notification,
+  Checkbox,
 } from "antd";
-import { doc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { keys } from "../constants";
-import { firestore } from "../firebase";
-import { useAuth } from "../contexts/AuthContext";
-import { handleAuthError } from "../helpers";
+import { apis, keys } from "../constants";
+import { apiClient } from "../helpers";
 import moment from "moment";
 
 export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
-  const { signup } = useAuth();
   const [currentData, setCurrentData] = useState();
   const [visible, setVisible] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -35,6 +29,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
   const handleOpen = (data) => {
     setVisible(true);
     if (data) {
+      console.log("data", data);
       setCurrentData(data);
       initData(data);
     }
@@ -51,7 +46,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
     form.setFields(
       Object.keys(data).map((name) => {
         let value = data[name];
-        if (name === "dob") value = moment(value, "DD/MM/YYYY");
+        if (name === "dob") value = value ? moment(value, "DD/MM/YYYY") : undefined;
         return { name, value };
       })
     );
@@ -67,25 +62,14 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
   const themMoiGiaoVien = async (values) => {
     try {
       setLoadingSubmit(true);
-      // signup
-      const password = values.phone;
-      const signupRes = await signup(values.email, password);
-      const uid = signupRes.user.uid;
-      // add to db
-      const data = {
-        ...values,
-        role: "teacher",
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp(),
-      };
-      await setDoc(doc(firestore, keys.collection_users, uid), data);
+      values.role = keys.ROLE_TEACHER;
+      await apiClient.post(apis.add_new_user, values);
       notification.success({ message: "Thêm mới thành công" });
       handleClose();
       return onSuccess();
     } catch (error) {
       setLoadingSubmit(false);
       console.log(error);
-      if (error.errorCode.includes("auth")) return handleAuthError(error);
       return notification.error({ message: "Thêm mới thất bại" });
     }
   };
@@ -93,12 +77,8 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
   const chinhSuaGiaoVien = async (values) => {
     try {
       setLoadingSubmit(true);
-      const data = {
-        ...values,
-        updated_at: serverTimestamp(),
-      };
-      const ref = doc(firestore, keys.collection_users, currentData.id);
-      await updateDoc(ref, data);
+      values.id = currentData.id;
+      await apiClient.post(apis.update_user, values);
       notification.success({ message: "Chỉnh sửa thành công" });
       handleClose();
       return onSuccess();
@@ -122,7 +102,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
               Huỷ bỏ
             </Button>
             <Button type="primary" loading={loadingSubmit} onClick={() => form.submit()}>
-              Cập nhật
+              Lưu thay đổi
             </Button>
           </Space>
         </Row>
@@ -141,6 +121,18 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
 
       <Form layout="vertical" form={form} onFinish={onFinish}>
         <Row gutter={10} align="bottom">
+          <Col span={12}>
+            <Form.Item label="Tên đăng nhập" name="username" {...requiredFormItemProps}>
+              <Input placeholder="Nhập" readOnly={currentData} />
+            </Form.Item>
+          </Col>
+
+          <Col span={12}>
+            <Form.Item label="Mật khẩu" name="password" {...requiredFormItemProps}>
+              <Input.Password placeholder="Nhập" />
+            </Form.Item>
+          </Col>
+
           <Col span={8}>
             <Form.Item label="Họ và tên" name="name" {...requiredFormItemProps}>
               <Input placeholder="Nhập" />
@@ -171,7 +163,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
 
           <Col span={8}>
             <Form.Item label="Email" name="email" {...requiredFormItemProps}>
-              <Input placeholder="Nhập" readOnly={!!currentData} />
+              <Input placeholder="Nhập" />
             </Form.Item>
           </Col>
 
@@ -182,18 +174,12 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
           </Col>
 
           <Col span={8}>
-            <Form.Item name="on_work" initialValue={true} valuePropName="checked">
+            <Form.Item name="active" initialValue={true} valuePropName="checked">
               <Checkbox defaultChecked>Đang công tác</Checkbox>
             </Form.Item>
           </Col>
         </Row>
       </Form>
-
-      <div>Lưu ý:</div>
-      <ul>
-        <li>Tài khoản đăng nhập là địa chỉ email</li>
-        <li>Mật khẩu sẽ được khởi tạo là số điện thoại</li>
-      </ul>
     </Drawer>
   );
 });
