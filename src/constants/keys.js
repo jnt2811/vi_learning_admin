@@ -9,4 +9,5 @@ export const keys = {
 
   ROLE_ADMIN: "admin",
   ROLE_TEACHER: "teacher",
+  ROLE_STUDENT: "student",
 };

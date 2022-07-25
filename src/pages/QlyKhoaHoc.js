@@ -1,15 +1,25 @@
-import { DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Tooltip, Popconfirm, Row, Space, Input, Table, Tag } from "antd";
-import { getDocs } from "firebase/firestore";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { Button, Tooltip, Popconfirm, Row, Space, Table, Tag, notification } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { collections } from "../constants";
+import { apis } from "../constants";
+import { apiClient } from "../helpers";
 import { CaiDatKhoaHoc } from "./CaiDatKhoaHoc";
 
 export const QlyKhoaHoc = () => {
   const columns = [
     {
       title: "Tên khoá học",
-      dataIndex: "title",
+      dataIndex: "name",
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
     },
     {
       title: "Số lượng bài học",
@@ -17,34 +27,29 @@ export const QlyKhoaHoc = () => {
       render: (data) => (data ? data.length : 0),
     },
     {
-      title: "Số lượng đăng ký",
-      dataIndex: "quantity_subscription",
-      render: () => 0,
-    },
-    {
       title: "Trạng thái",
-      dataIndex: "status",
-      render: (data) => (data === "public" ? <Tag color="green">Công khai</Tag> : <Tag color="red">Riêng tư</Tag>),
+      dataIndex: "active",
+      render: (data) =>
+        !!data ? <Tag color="green">Công khai</Tag> : <Tag color="red">Riêng tư</Tag>,
     },
     {
       title: "",
-      dataIndex: "status",
+      dataIndex: "active",
       width: "1%",
       render: (data, record) => (
         <Space>
           <Tooltip title="Chỉnh sửa">
-            <Button icon={<EditOutlined />} onClick={() => handleClickChinhSua(record)}></Button>
+            <Button
+              icon={<EditOutlined />}
+              onClick={() => handleClickChinhSua(record)}
+              type="primary"
+              ghost
+            ></Button>
           </Tooltip>
 
-          <Tooltip title={`Chuyển sang "${data ? "Riêng tư" : "Công khai"}"`}>
-            <Button icon={data ? <EyeInvisibleOutlined /> : <EyeOutlined />}></Button>
-          </Tooltip>
+          <SwitchStateButton record={record} onSuccess={getDataSource} />
 
-          <Tooltip title="Xoá">
-            <Popconfirm title="Xoá khoá học" onConfirm={() => handleClickXoa(record)}>
-              <Button icon={<DeleteOutlined />}></Button>
-            </Popconfirm>
-          </Tooltip>
+          <DeleteButton record={record} onSuccess={getDataSource} />
         </Space>
       ),
     },
@@ -56,7 +61,6 @@ export const QlyKhoaHoc = () => {
 
   const handleClickThemMoi = () => ref.current?.open();
   const handleClickChinhSua = (record) => ref.current?.open(record);
-  const handleClickXoa = () => {};
 
   useEffect(() => {
     getDataSource();
@@ -66,8 +70,8 @@ export const QlyKhoaHoc = () => {
     setDataSource([]);
     try {
       setLoading(true);
-      const querySnapshot = await getDocs(collections.courses);
-      querySnapshot.forEach((doc) => setDataSource((curr) => [...curr, { id: doc.id, ...doc.data() }]));
+      const { data } = await apiClient.post(apis.get_all_courses);
+      setDataSource(data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -75,13 +79,15 @@ export const QlyKhoaHoc = () => {
     }
   };
 
+  console.log(dataSource);
+
   return (
     <div>
       <Row align="middle" justify="space-between" style={{ marginBottom: 20 }}>
         <h1 style={{ marginBottom: 0 }}>Quản lý khoá học</h1>
 
         <Space>
-          <Input placeholder="Tìm kiếm..." prefix={<SearchOutlined />} />
+          {/* <Input placeholder="Tìm kiếm..." prefix={<SearchOutlined />} /> */}
           <Button type="primary" icon={<PlusOutlined />} onClick={handleClickThemMoi}>
             Thêm mới
           </Button>
@@ -92,5 +98,64 @@ export const QlyKhoaHoc = () => {
 
       <CaiDatKhoaHoc ref={ref} onSuccess={getDataSource} />
     </div>
+  );
+};
+
+const SwitchStateButton = ({ record, onSuccess }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSwitch = async () => {
+    try {
+      setLoading(true);
+      await apiClient.post(apis.update_course, { id: record.id, active: !record.active });
+      notification.success({ message: "Đổi trạng thái thành công", placement: "bottomLeft" });
+      onSuccess();
+    } catch (error) {
+      console.log(error);
+      notification.error({ message: "Đổi trạng thái thất bại", placement: "bottomLeft" });
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Tooltip title={`Chuyển sang "${!!record.active ? "Riêng tư" : "Công khai"}"`}>
+      <Button
+        icon={record.active ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        type="primary"
+        onClick={handleSwitch}
+        loading={loading}
+      ></Button>
+    </Tooltip>
+  );
+};
+
+const DeleteButton = ({ record, onSuccess }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      await apiClient.post(apis.update_course, { id: record.id, visible: 0 });
+      notification.success({ message: "Xóa khóa học thành công", placement: "bottomLeft" });
+      onSuccess();
+    } catch (error) {
+      console.log(error);
+      notification.error({ message: "Xóa khóa học thất bại", placement: "bottomLeft" });
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Popconfirm
+      title="Xác nhận?"
+      okText="Đồng ý"
+      onConfirm={handleDelete}
+      okButtonProps={{ loading }}
+      showCancel={false}
+    >
+      <Tooltip title="Xóa">
+        <Button icon={<DeleteOutlined />} type="primary" danger></Button>
+      </Tooltip>
+    </Popconfirm>
   );
 };

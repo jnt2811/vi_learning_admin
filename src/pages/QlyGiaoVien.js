@@ -49,7 +49,12 @@ export const QlyGiaoVien = () => {
       render: (data, record) => (
         <Space>
           <Tooltip title="Chỉnh sửa">
-            <Button icon={<EditOutlined />} onClick={() => handleClickChinhSua(record)}></Button>
+            <Button
+              icon={<EditOutlined />}
+              onClick={() => handleClickChinhSua(record)}
+              type="primary"
+              ghost
+            ></Button>
           </Tooltip>
           <SwitchStateButton record={record} onSuccess={getDataSource} />
           <DeleteButton record={record} onSuccess={getDataSource} />
@@ -122,7 +127,12 @@ const SwitchStateButton = ({ record, onSuccess }) => {
 
   return (
     <Tooltip title="Đổi trạng thái">
-      <Button icon={<ReloadOutlined />} loading={loading} onClick={handleSwitch}></Button>
+      <Button
+        icon={<ReloadOutlined />}
+        loading={loading}
+        onClick={handleSwitch}
+        type="primary"
+      ></Button>
     </Tooltip>
   );
 };
@@ -152,7 +162,7 @@ const DeleteButton = ({ record, onSuccess }) => {
       showCancel={false}
     >
       <Tooltip title="Xóa">
-        <Button icon={<DeleteOutlined />}></Button>
+        <Button icon={<DeleteOutlined />} type="primary" danger></Button>
       </Tooltip>
     </Popconfirm>
   );

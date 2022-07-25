@@ -1,17 +1,33 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { Drawer, Row, Space, Button, Table, Col, Input, Radio, Divider, Upload, Form, notification, Select, InputNumber } from "antd";
+import {
+  Drawer,
+  Row,
+  Space,
+  Button,
+  Table,
+  Col,
+  Input,
+  Radio,
+  Divider,
+  Upload,
+  Form,
+  notification,
+  Select,
+  InputNumber,
+} from "antd";
+import { nanoid } from "nanoid";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import { collections, keys } from "../constants";
-import { addDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { firestore } from "../firebase";
+import { apis } from "../constants";
+import { apiClient } from "../helpers";
+import { useAuth } from "../contexts/AuthContext";
 import { CaiDatCauHoi } from "./CaiDatCauHoi";
 
 export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
   const columns = [
     {
       title: "Tên câu hỏi",
-      dataIndex: "question",
-      ellipsis: true,
+      dataIndex: "name",
+      render: (data) => <div dangerouslySetInnerHTML={{ __html: data }} />,
     },
     // {
     //   title: "Link video",
@@ -63,6 +79,8 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form] = Form.useForm();
   const [dsCauHoi, setDsCauHoi] = useState([]);
+  const [loadingQuestionList, setLoadingQuestionList] = useState(false);
+  const { currentUser } = useAuth();
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -91,7 +109,42 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
         value: data[name],
       }))
     );
-    setDsCauHoi(data.questions);
+    getQuestionList(data.id);
+  };
+
+  const getQuestionList = async (id) => {
+    try {
+      setLoadingQuestionList(true);
+      const { data } = await apiClient.post(apis.get_all_questions, { test_id: id });
+
+      console.log("questions", data);
+
+      setDsCauHoi(
+        data.map((item) => {
+          item.key = nanoid(5);
+
+          const answers = item.answers;
+
+          item.ans_a = answers[0];
+          item.ans_b = answers[1];
+          item.ans_c = answers[2];
+          item.ans_d = answers[3];
+
+          if (item.correct_answer === item.ans_a) item.correct_answer = "ans_a";
+          if (item.correct_answer === item.ans_b) item.correct_answer = "ans_b";
+          if (item.correct_answer === item.ans_c) item.correct_answer = "ans_c";
+          if (item.correct_answer === item.ans_d) item.correct_answer = "ans_d";
+
+          console.log("QES", item);
+
+          return item;
+        })
+      );
+      setLoadingQuestionList(false);
+    } catch (error) {
+      console.log(error);
+      setLoadingQuestionList(false);
+    }
   };
 
   const handleUpdateBaiThi = async (values) => {
@@ -105,10 +158,13 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
       const data = {
         ...values,
         questions: dsCauHoi,
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp(),
       };
-      await addDoc(collections.tests, data);
+
+      data.created_by = currentUser.id;
+      data.questions = formattedQuestions(data.questions);
+
+      await apiClient.post(apis.add_new_test, data);
+
       notification.success({ message: "Thêm mới thành công" });
       onSuccess();
       return handleClose();
@@ -124,10 +180,13 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
       const data = {
         ...values,
         questions: dsCauHoi,
-        updated_at: serverTimestamp(),
       };
-      const ref = doc(firestore, keys.collection_tests, currentData.id);
-      await updateDoc(ref, data);
+
+      data.id = currentData.id;
+      data.questions = formattedQuestions(data.questions);
+
+      await apiClient.post(apis.update_test, data);
+
       notification.success({ message: "Chỉnh sửa thành công" });
       handleClose();
       return onSuccess();
@@ -136,6 +195,19 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
       console.log(error);
       return notification.error({ message: "Chỉnh sửa thất bại" });
     }
+  };
+
+  const formattedQuestions = (questions) => {
+    return questions.map((item) => {
+      item.correct_answer = item[item.correct_answer];
+      item.answers = [item.ans_a, item.ans_b, item.ans_c, item.ans_d];
+      delete item.ans_a;
+      delete item.ans_b;
+      delete item.ans_c;
+      delete item.ans_d;
+      delete item.key;
+      return item;
+    });
   };
 
   const handleThemCauHoi = () => cauHoiRef.current?.open();
@@ -184,7 +256,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
 
             <Row gutter={10}>
               <Col span={8}>
-                <Form.Item label="Tên bài thi" name="title" {...requiredFormItemProps}>
+                <Form.Item label="Tên bài thi" name="name" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
@@ -192,15 +264,15 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
               <Col span={8}>
                 <Form.Item label="Mức độ" name="mode" {...requiredFormItemProps}>
                   <Select placeholder="Nhập">
-                    <Select.Option value="easy">Dễ</Select.Option>
-                    <Select.Option value="normal">Thường</Select.Option>
+                    <Select.Option value="EASY">Dễ</Select.Option>
+                    <Select.Option value="MEDIUM">Thường</Select.Option>
                     <Select.Option value="hard">Khó</Select.Option>
                   </Select>
                 </Form.Item>
               </Col>
 
               <Col span={8}>
-                <Form.Item label="Thời gian (phút)" name="time" {...requiredFormItemProps}>
+                <Form.Item label="Thời gian (phút)" name="time_limit" {...requiredFormItemProps}>
                   <InputNumber placeholder="Nhập" min={0} style={{ width: "100%" }} />
                 </Form.Item>
               </Col>
@@ -212,11 +284,11 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
               </Col>
 
               <Col span={8}>
-                <Form.Item label="Trạng thái" name="status" initialValue="public">
+                <Form.Item label="Trạng thái" name="active" initialValue={1}>
                   <Radio.Group>
                     <Space>
-                      <Radio value="public">Công khai</Radio>
-                      <Radio value="private">Riêng tư</Radio>
+                      <Radio value={1}>Công khai</Radio>
+                      <Radio value={0}>Riêng tư</Radio>
                     </Space>
                   </Radio.Group>
                 </Form.Item>
@@ -244,7 +316,13 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Button>
       </Row>
 
-      <Table columns={columns} dataSource={dsCauHoi} size="small" rowKey="key" />
+      <Table
+        columns={columns}
+        dataSource={dsCauHoi}
+        size="small"
+        rowKey="key"
+        loading={loadingQuestionList}
+      />
 
       <CaiDatCauHoi ref={cauHoiRef} onSuccess={handleCaiDatCauHoi} />
     </Drawer>

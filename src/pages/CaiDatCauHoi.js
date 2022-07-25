@@ -1,4 +1,4 @@
-import { Button, Col, Drawer, Form, Input, Radio, Row, Space } from "antd";
+import { Button, Col, Drawer, Form, Input, notification, Radio, Row, Space } from "antd";
 import { nanoid } from "nanoid";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { TextEditor } from "../components";
@@ -17,7 +17,7 @@ export const CaiDatCauHoi = forwardRef(({ onSuccess }, ref) => {
     setVisible(true);
     setCurrentData(data);
     if (data) {
-      setEditorValue(data.question);
+      setEditorValue(data.name);
       form.setFields(
         Object.keys(data).map((name) => ({
           name,
@@ -37,11 +37,21 @@ export const CaiDatCauHoi = forwardRef(({ onSuccess }, ref) => {
   const onFinish = (values) => {
     let data = {
       ...values,
-      question: editorValue,
+      name: editorValue,
     };
 
     if (!currentData) data.key = nanoid(5);
     else data.key = currentData.key;
+
+    function checkIfDuplicateExists(arr) {
+      return new Set(arr).size !== arr.length;
+    }
+
+    const isDuplicate = checkIfDuplicateExists([data.ans_a, data.ans_b, data.ans_c, data.ans_d]);
+
+    if (isDuplicate) {
+      return notification.error({ message: "Câu trả lời bị trùng lặp", placement: "bottomLeft" });
+    }
 
     onSuccess(data, !currentData);
     handleClose();
@@ -100,7 +110,7 @@ export const CaiDatCauHoi = forwardRef(({ onSuccess }, ref) => {
         <h3>Đáp án</h3>
 
         <Form.Item
-          name="solution"
+          name="correct_answer"
           rules={[
             {
               required: true,

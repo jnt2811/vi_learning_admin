@@ -3,11 +3,12 @@ import axios from "axios";
 import { keys } from "./constants";
 
 export const getAccessToken = () => {
-  console.log(localStorage.getItem(keys.ACCESS_TOKEN));
+  // console.log(localStorage.getItem(keys.ACCESS_TOKEN));
   return localStorage.getItem(keys.ACCESS_TOKEN) || "";
 };
 
 export const apiClient = axios.create({
+  // baseURL: "https://vi-learning-v2.herokuapp.com/api",
   baseURL: "http://localhost:8088/api",
   headers: {
     Accept: "application/json",

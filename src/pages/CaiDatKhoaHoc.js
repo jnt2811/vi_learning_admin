@@ -1,19 +1,35 @@
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { Drawer, Row, Space, Button, Table, Col, Input, Radio, Divider, Upload, Form, notification } from "antd";
+import {
+  Drawer,
+  Row,
+  Space,
+  Button,
+  Table,
+  Col,
+  Input,
+  Radio,
+  Divider,
+  Upload,
+  Form,
+  notification,
+} from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { collections, keys } from "../constants";
-import { addDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { firestore } from "../firebase";
+import { apis } from "../constants";
+import { apiClient } from "../helpers";
+import { useAuth } from "../contexts/AuthContext";
+
+const sample_thumbnail =
+  "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fGxlYXJuaW5nfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=900&q=60";
 
 export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   const columns = [
     {
       title: "Tên bài học",
-      dataIndex: "title",
+      dataIndex: "name",
     },
     {
       title: "Link video",
-      dataIndex: "link",
+      dataIndex: "video",
       render: (data) => (
         <a href={data} target="_blank" rel="noreferrer">
           {data}
@@ -47,6 +63,8 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   const [formInfoKhoaHoc] = Form.useForm();
   const [formThemBaihoc] = Form.useForm();
   const [dsBaiHoc, setDsBaiHoc] = useState([]);
+  const [loadingLessonList, setLoadingLessonList] = useState(false);
+  const { currentUser } = useAuth();
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -76,7 +94,19 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
         value: data[name],
       }))
     );
-    setDsBaiHoc(data.lessons);
+    getLessonList(data.id);
+  };
+
+  const getLessonList = async (id) => {
+    try {
+      setLoadingLessonList(true);
+      const { data } = await apiClient.post(apis.get_all_lessons, { course_id: id });
+      setDsBaiHoc(data);
+      setLoadingLessonList(false);
+    } catch (error) {
+      console.log(error);
+      setLoadingLessonList(false);
+    }
   };
 
   const handleUpdateKhoaHoc = async (values) => {
@@ -90,10 +120,10 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
       const data = {
         ...values,
         lessons: dsBaiHoc,
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp(),
       };
-      await addDoc(collections.courses, data);
+      data.thumbnail = sample_thumbnail;
+      data.created_by = currentUser?.id;
+      await apiClient.post(apis.add_new_course, data);
       notification.success({ message: "Thêm mới thành công" });
       onSuccess();
       return handleClose();
@@ -109,10 +139,10 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
       const data = {
         ...values,
         lessons: dsBaiHoc,
-        updated_at: serverTimestamp(),
       };
-      const ref = doc(firestore, keys.collection_courses, currentData.id);
-      await updateDoc(ref, data);
+      data.thumbnail = sample_thumbnail;
+      data.id = currentData.id;
+      await apiClient.post(apis.update_course, data);
       notification.success({ message: "Chỉnh sửa thành công" });
       handleClose();
       return onSuccess();
@@ -124,7 +154,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   };
 
   const handleThemBaihoc = (values) => {
-    const exist = dsBaiHoc.some((baiHoc) => baiHoc.title === values.title);
+    const exist = dsBaiHoc.some((baiHoc) => baiHoc.name === values.name);
     if (exist) return notification.error({ message: "Bài học đã tồn tại!" });
     setDsBaiHoc((curr) => [values, ...curr]);
     formThemBaihoc.resetFields();
@@ -132,7 +162,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
 
   const handleXoaBaihoc = (record) => {
     setDsBaiHoc((curr) => {
-      return curr.filter((baiHoc) => baiHoc.title !== record.title);
+      return curr.filter((baiHoc) => baiHoc.name !== record.name);
     });
   };
 
@@ -162,7 +192,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
 
             <Row gutter={10}>
               <Col span={6}>
-                <Form.Item label="Tên khoá học" name="title" {...requiredFormItemProps}>
+                <Form.Item label="Tên khoá học" name="name" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
@@ -174,11 +204,11 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
               </Col>
 
               <Col span={7}>
-                <Form.Item label="Trạng thái" name="status" initialValue="public">
+                <Form.Item label="Trạng thái" name="active" initialValue={1}>
                   <Radio.Group>
                     <Space>
-                      <Radio value="public">Công khai</Radio>
-                      <Radio value="private">Riêng tư</Radio>
+                      <Radio value={1}>Công khai</Radio>
+                      <Radio value={0}>Riêng tư</Radio>
                     </Space>
                   </Radio.Group>
                 </Form.Item>
@@ -206,12 +236,12 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
           <Col flex="auto">
             <Row gutter={10}>
               <Col span={6}>
-                <Form.Item label="Tên bài học" name="title" {...requiredFormItemProps}>
+                <Form.Item label="Tên bài học" name="name" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
               <Col span={6}>
-                <Form.Item label="Link video" name="link" {...requiredFormItemProps}>
+                <Form.Item label="Link video" name="video" {...requiredFormItemProps}>
                   <Input placeholder="Nhập" />
                 </Form.Item>
               </Col>
@@ -224,14 +254,25 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
           </Col>
 
           <Col>
-            <Button type="primary" htmlType="submit" style={{ marginTop: 3 }} icon={<PlusOutlined />}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              style={{ marginTop: 3 }}
+              icon={<PlusOutlined />}
+            >
               Thêm
             </Button>
           </Col>
         </Row>
       </Form>
 
-      <Table columns={columns} dataSource={dsBaiHoc} size="small" rowKey="title" />
+      <Table
+        columns={columns}
+        dataSource={dsBaiHoc}
+        size="small"
+        rowKey="name"
+        loading={loadingLessonList}
+      />
     </Drawer>
   );
 });

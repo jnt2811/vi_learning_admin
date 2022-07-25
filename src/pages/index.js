@@ -3,4 +3,4 @@ export * from "./QlyHocSinh";
 export * from "./QlyKhoaHoc";
 export * from "./QlyThiThu";
 export * from "./DangNhap";
-export * from "./Qlysach/Qlysach";
+export * from "./QlySach";

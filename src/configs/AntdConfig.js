@@ -4,7 +4,7 @@ import viVN from "antd/lib/locale/vi_VN";
 
 ConfigProvider.config({
   theme: {
-    primaryColor: "#fb5231",
+    primaryColor: "#4A5FC1",
   },
 });
 

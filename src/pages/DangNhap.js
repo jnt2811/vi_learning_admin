@@ -1,21 +1,26 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Form, Input, Layout, Button, notification } from "antd";
+import { useState } from "react";
 import { apis, keys } from "../constants";
 import { apiClient } from "../helpers";
-import { useAuth } from "../contexts/AuthContext";
 
 export const DangNhap = () => {
-  const { setCurrentUser } = useAuth();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (values) => {
     try {
+      setLoading(true);
       const { data } = await apiClient.post(apis.login, values);
+      if (data.user.role !== keys.ROLE_ADMIN && data.user.role !== keys.ROLE_TEACHER) {
+        setLoading(false);
+        return notification.error({ message: "Đăng nhập thất bại", placement: "bottomLeft" });
+      }
       localStorage.setItem(keys.ACCESS_TOKEN, data.token);
       localStorage.setItem(keys.USER_INFO, JSON.stringify(data.user));
-      setCurrentUser(data.user);
-      notification.success({ message: "Đăng nhập thành công", placement: "bottomLeft" });
+      window.location.reload();
     } catch (error) {
       console.log(error);
+      setLoading(false);
       notification.error({ message: "Đăng nhập thất bại", placement: "bottomLeft" });
     }
   };
@@ -38,7 +43,7 @@ export const DangNhap = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" block size="large" loading={false}>
+          <Button type="primary" htmlType="submit" block size="large" loading={loading}>
             Đăng nhập
           </Button>
         </Form.Item>

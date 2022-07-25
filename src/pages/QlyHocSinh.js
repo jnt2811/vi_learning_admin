@@ -1,10 +1,7 @@
-import { InfoCircleOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Tooltip, Row, Space, Input, Table, Avatar } from "antd";
-import axios from "axios";
-import { getDocs, query, where } from "firebase/firestore";
+import { Row, Table, Avatar } from "antd";
 import { useEffect, useState } from "react";
-import { apis, collections } from "../constants";
-import { apiClient, getShortName, getAccessToken } from "../helpers";
+import { apis, keys } from "../constants";
+import { apiClient, getShortName } from "../helpers";
 
 export const QlyHocSinh = () => {
   const columns = [
@@ -17,6 +14,10 @@ export const QlyHocSinh = () => {
     {
       title: "Họ và tên",
       dataIndex: "name",
+    },
+    {
+      title: "Tên đăng nhập",
+      dataIndex: "username",
     },
     {
       title: "Giới tính",
@@ -34,26 +35,22 @@ export const QlyHocSinh = () => {
       title: "Email",
       dataIndex: "email",
     },
-    {
-      title: "Số khoá học đã tham gia",
-      dataIndex: "quantity_lesson_joined",
-    },
-    {
-      title: "",
-      dataIndex: "",
-      width: "1%",
-      render: (_, record) => (
-        <Space>
-          <Tooltip title="Xem chi tiết">
-            <Button
-              disabled
-              icon={<InfoCircleOutlined />}
-              onClick={() => handleClickViewDetail(record)}
-            ></Button>
-          </Tooltip>
-        </Space>
-      ),
-    },
+    // {
+    //   title: "",
+    //   dataIndex: "",
+    //   width: "1%",
+    //   render: (_, record) => (
+    //     <Space>
+    //       <Tooltip title="Xem chi tiết">
+    //         <Button
+    //           disabled
+    //           icon={<InfoCircleOutlined />}
+    //           onClick={() => handleClickViewDetail(record)}
+    //         ></Button>
+    //       </Tooltip>
+    //     </Space>
+    //   ),
+    // },
   ];
 
   const [dataSource, setDataSource] = useState([]);
@@ -67,16 +64,8 @@ export const QlyHocSinh = () => {
     setDataSource([]);
     try {
       setLoading(true);
-      // const res = await apiClient.get(apis.get_all_users);
-      const res = await axios({
-        method: "get",
-        url: apis.get_all_users,
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${getAccessToken()}`,
-        },
-      });
-      console.log(res);
+      const { data } = await apiClient.post(apis.get_all_users, { role: keys.ROLE_STUDENT });
+      setDataSource(data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -84,16 +73,16 @@ export const QlyHocSinh = () => {
     }
   };
 
-  const handleClickViewDetail = (record) => {};
+  // const handleClickViewDetail = (record) => {};
 
   return (
     <div>
       <Row align="middle" justify="space-between" style={{ marginBottom: 20 }}>
         <h1 style={{ marginBottom: 0 }}>Quản lý học sinh</h1>
 
-        <Space>
+        {/* <Space>
           <Input placeholder="Tìm kiếm..." prefix={<SearchOutlined />} />
-        </Space>
+        </Space> */}
       </Row>
 
       <Table columns={columns} dataSource={dataSource} loading={loading} size="small" rowKey="id" />
