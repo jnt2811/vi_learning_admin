@@ -1,62 +1,66 @@
-import React, { useRef, useState } from "react";
-import { Button, Tooltip, Popconfirm, Row, Space, Table } from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Tooltip, Popconfirm, Row, Space, Table, notification } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { CaiDatSach } from "./CaiDatSach";
+import { apiClient } from "../helpers";
+import { apis } from "../constants";
 
-export const Qlysach = () => {
+export const QlySach = () => {
   const ref = useRef();
-  const [dataSource] = useState([
-    {
-      id: "1",
-      title: "Sách văn hóa",
-      age: 32,
-      address: "10 Downing Street",
-    },
-    {
-      id: "2",
-      title: "Hóa học 12",
-      age: 42,
-      address: "10 Downing Street",
-    },
-  ]);
-  const [loading] = useState(false);
+  const [dataSource, setDataSource] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    getDataSource();
+  }, []);
+
+  const getDataSource = async () => {
+    setDataSource([]);
+    try {
+      setLoading(true);
+      const { data } = await apiClient.post(apis.get_all_books);
+      setDataSource(data);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
   const columns = [
     {
-      title: "Tiêu đề",
-      dataIndex: "title",
+      title: "Tên sách",
+      dataIndex: "name",
     },
     {
-      title: "Loại sách",
-      dataIndex: "gender",
+      title: "Mô tả",
+      dataIndex: "description",
+      ellipsis: true,
+      width: "60%",
     },
-
-    {
-      title: "Mô tả sách",
-      dataIndex: "phone",
-    },
-
     {
       title: "",
-      dataIndex: "status",
-      width: "1%",
-      render: (data, record) => (
+      width: "90px",
+      render: (_, record) => (
         <Space>
           <Tooltip title="Chỉnh sửa">
-            <Button icon={<EditOutlined />} onClick={() => handleClickChinhSua(record)}></Button>
+            <Button
+              icon={<EditOutlined />}
+              onClick={() => handleClickChinhSua(record)}
+              type="primary"
+            ></Button>
           </Tooltip>
 
-          <Tooltip title="Xoá">
-            <Popconfirm title="Xoá khoá học" onConfirm={() => handleClickXoa(record)}>
-              <Button icon={<DeleteOutlined />}></Button>
-            </Popconfirm>
-          </Tooltip>
+          <DeleteButton record={record} onSuccess={getDataSource} />
         </Space>
       ),
     },
   ];
-  const handleClickXoa = () => {};
+
   const handleClickThemMoi = () => ref.current?.open();
   const handleClickChinhSua = (record) => ref.current?.open(record);
+
   return (
     <div>
       <Row align="middle" justify="space-between" style={{ marginBottom: 20 }}>
@@ -72,7 +76,38 @@ export const Qlysach = () => {
 
       <Table columns={columns} dataSource={dataSource} size="small" loading={loading} rowKey="id" />
 
-      <CaiDatSach ref={ref} />
+      <CaiDatSach ref={ref} onSuccess={getDataSource} />
     </div>
+  );
+};
+
+const DeleteButton = ({ record, onSuccess }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      await apiClient.post(apis.delete_book, { id: record.id });
+      notification.success({ message: "Xóa sách thành công", placement: "bottomLeft" });
+      onSuccess();
+    } catch (error) {
+      console.log(error);
+      notification.error({ message: "Xóa sách thất bại", placement: "bottomLeft" });
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Popconfirm
+      title="Xác nhận?"
+      okText="Đồng ý"
+      onConfirm={handleDelete}
+      okButtonProps={{ loading }}
+      showCancel={false}
+    >
+      <Tooltip title="Xóa">
+        <Button icon={<DeleteOutlined />} type="primary" danger></Button>
+      </Tooltip>
+    </Popconfirm>
   );
 };

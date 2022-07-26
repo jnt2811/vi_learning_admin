@@ -59,9 +59,7 @@ export const Header = () => {
             }
           >
             <Avatar size={35} style={{ cursor: "pointer" }}>
-              {getShortName(
-                currentUser?.lastName + " " + currentUser?.firstName
-              )}
+              {getShortName(currentUser?.lastName + " " + currentUser?.firstName)}
             </Avatar>
           </Dropdown>
         </Col>
@@ -90,5 +88,9 @@ const items = [
   {
     key: paths.quan_ly_sach,
     label: "Quản lý sách",
+  },
+  {
+    key: paths.quan_ly_audio,
+    label: "Quản lý audio",
   },
 ];

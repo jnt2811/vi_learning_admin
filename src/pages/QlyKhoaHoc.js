@@ -23,8 +23,7 @@ export const QlyKhoaHoc = () => {
     },
     {
       title: "Số lượng bài học",
-      dataIndex: "lessons",
-      render: (data) => (data ? data.length : 0),
+      dataIndex: "total_lessons",
     },
     {
       title: "Trạng thái",

@@ -10,11 +10,13 @@ import {
   DatePicker,
   notification,
   Checkbox,
+  Upload,
 } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { apis, keys } from "../constants";
 import { apiClient } from "../helpers";
 import moment from "moment";
+import { PlusOutlined } from "@ant-design/icons";
 
 export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
   const [currentData, setCurrentData] = useState();
@@ -108,7 +110,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Row>
       }
     >
-      {/* <Row justify="center">
+      <Row justify="center">
         <Col>
           <Upload maxCount={1} listType="picture-card" showUploadList={false}>
             <div>
@@ -117,7 +119,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
             </div>
           </Upload>
         </Col>
-      </Row> */}
+      </Row>
 
       <Form layout="vertical" form={form} onFinish={onFinish}>
         <Row gutter={10} align="bottom">

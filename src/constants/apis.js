@@ -11,4 +11,13 @@ export const apis = {
   add_new_test: "/resources/test/add_test",
   update_test: "/resources/test/edit_test",
   get_all_questions: "/resources/question/get_questions",
+  get_all_books: "/public/book/get_books",
+  add_book: "/resources/book/add_book",
+  edit_book: "/resources/book/edit_book",
+  delete_book: "/resources/book/delete_book",
+  get_all_audios: "/public/audio/get_audios",
+  add_audio: "/resources/audio/add_audio",
+  edit_audio: "/resources/audio/edit_audio",
+  delete_audio: "/resources/audio/delete_audio",
+  get_test_history: "/resources/test_history/get_test_history",
 };

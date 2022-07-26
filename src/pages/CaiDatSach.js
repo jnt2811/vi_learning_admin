@@ -1,16 +1,14 @@
-import { Drawer, Row, Space, Button, Col, Input, Divider, Form, notification, Select } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { Drawer, Row, Space, Button, Input, Form, notification, Col, Upload } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { collections, keys } from "../constants";
-import { addDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { firestore } from "../firebase";
-import TextArea from "antd/lib/input/TextArea";
+import { apis } from "../constants";
+import { apiClient } from "../helpers";
 
-export const CaiDatSach = forwardRef((props, ref) => {
+export const CaiDatSach = forwardRef(({ onSuccess }, ref) => {
   const [currentData, setCurrentData] = useState();
   const [visible, setVisible] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form] = Form.useForm();
-  const [dsCauHoi, setDsCauHoi] = useState([]);
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -27,7 +25,6 @@ export const CaiDatSach = forwardRef((props, ref) => {
   const handleClose = () => {
     setVisible(false);
     setLoadingSubmit(false);
-    setDsCauHoi([]);
     setCurrentData();
     form.resetFields();
   };
@@ -39,27 +36,21 @@ export const CaiDatSach = forwardRef((props, ref) => {
         value: data[name],
       }))
     );
-    setDsCauHoi(data.questions);
   };
 
-  const handleUpdateBaiThi = async (values) => {
+  const handleUpdateSach = async (values) => {
     setLoadingSubmit(true);
-    if (!currentData) themMoiBaiThi(values);
-    else chinhSuaBaiThi(values);
+    if (!currentData) themMoiSach(values);
+    else chinhSuaSach(values);
   };
 
-  const themMoiBaiThi = async (values) => {
+  const themMoiSach = async (values) => {
     try {
-      const data = {
-        ...values,
-        questions: dsCauHoi,
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp(),
-      };
-      await addDoc(collections.tests, data);
+      const data = { ...values };
+      await apiClient.post(apis.add_book, data);
       notification.success({ message: "Thêm mới thành công" });
-      //   onSuccess();
-      return handleClose();
+      handleClose();
+      return onSuccess();
     } catch (error) {
       setLoadingSubmit(false);
       console.log(error);
@@ -67,18 +58,14 @@ export const CaiDatSach = forwardRef((props, ref) => {
     }
   };
 
-  const chinhSuaBaiThi = async (values) => {
+  const chinhSuaSach = async (values) => {
     try {
-      const data = {
-        ...values,
-        questions: dsCauHoi,
-        updated_at: serverTimestamp(),
-      };
-      const ref = doc(firestore, keys.collection_tests, currentData.id);
-      await updateDoc(ref, data);
+      const data = { ...values };
+      data.id = currentData.id;
+      await apiClient.post(apis.edit_book, data);
       notification.success({ message: "Chỉnh sửa thành công" });
       handleClose();
-      //   return onSuccess();
+      return onSuccess();
     } catch (error) {
       setLoadingSubmit(false);
       console.log(error);
@@ -88,9 +75,9 @@ export const CaiDatSach = forwardRef((props, ref) => {
 
   return (
     <Drawer
-      width={1000}
       visible={visible}
-      title={`${!currentData ? "Thêm mới" : "Chỉnh sửa"} bài thi`}
+      width={500}
+      title={`${!currentData ? "Thêm mới" : "Chỉnh sửa"} sách`}
       onClose={handleClose}
       footer={
         <Row align="middle" justify="end">
@@ -106,72 +93,27 @@ export const CaiDatSach = forwardRef((props, ref) => {
         </Row>
       }
     >
-      <Row gutter={20} wrap={false}>
-        <Col flex="auto">
-          <Form layout="vertical" form={form} onFinish={handleUpdateBaiThi}>
-            <h3>Thông tin sách</h3>
+      <Form layout="vertical" form={form} onFinish={handleUpdateSach}>
+        <Form.Item label="Tên sách" name="name" {...requiredFormItemProps}>
+          <Input placeholder="Nhập" />
+        </Form.Item>
 
-            <Row gutter={10}>
-              <Col span={12}>
-                <Form.Item label="Tên tiêu đề sách" name="title" {...requiredFormItemProps}>
-                  <Input placeholder="Nhập" />
-                </Form.Item>
-              </Col>
+        <Form.Item label="Mô tả" name="description" {...requiredFormItemProps}>
+          <Input.TextArea rows={6} />
+        </Form.Item>
+      </Form>
 
-              <Col span={12}>
-                <Form.Item label="Loại sách" name="mode" {...requiredFormItemProps}>
-                  <Select placeholder="Nhập">
-                    <Select.Option value="easy">Dễ</Select.Option>
-                    <Select.Option value="normal">Thường</Select.Option>
-                    <Select.Option value="hard">Khó</Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-
-              {/* <Col span={8}>
-                <Form.Item
-                  label="Thời gian (phút)"
-                  name="time"
-                  {...requiredFormItemProps}
-                >
-                  <InputNumber
-                    placeholder="Nhập"
-                    min={0}
-                    style={{ width: "100%" }}
-                  />
-                </Form.Item>
-              </Col> */}
-
-              <Col span={24}>
-                <Form.Item label="Mô tả" name="description" {...requiredFormItemProps}>
-                  <TextArea
-                    rows={4}
-                    placeholder="Điền vào đây"
-                    // maxLength={6}
-                  />
-                </Form.Item>
-              </Col>
-
-              {/* <Col span={8}>
-                <Form.Item
-                  label="Trạng thái"
-                  name="status"
-                  initialValue="public"
-                >
-                  <Radio.Group>
-                    <Space>
-                      <Radio value="public">Công khai</Radio>
-                      <Radio value="private">Riêng tư</Radio>
-                    </Space>
-                  </Radio.Group>
-                </Form.Item>
-              </Col> */}
-            </Row>
-          </Form>
+      <label>Bộ sưu tập ảnh</label>
+      <Row style={{ marginTop: 10 }}>
+        <Col>
+          <Upload maxCount={1} listType="picture-card" showUploadList={false}>
+            <div>
+              <PlusOutlined />
+              <div>Tải ảnh lên</div>
+            </div>
+          </Upload>
         </Col>
       </Row>
-
-      <Divider style={{ marginTop: 5 }} />
     </Drawer>
   );
 });

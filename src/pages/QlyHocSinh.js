@@ -1,4 +1,6 @@
-import { Row, Table, Avatar } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import { Row, Table, Avatar, Tooltip, Button, Modal } from "antd";
+import moment from "moment";
 import { useEffect, useState } from "react";
 import { apis, keys } from "../constants";
 import { apiClient, getShortName } from "../helpers";
@@ -35,26 +37,28 @@ export const QlyHocSinh = () => {
       title: "Email",
       dataIndex: "email",
     },
-    // {
-    //   title: "",
-    //   dataIndex: "",
-    //   width: "1%",
-    //   render: (_, record) => (
-    //     <Space>
-    //       <Tooltip title="Xem chi tiết">
-    //         <Button
-    //           disabled
-    //           icon={<InfoCircleOutlined />}
-    //           onClick={() => handleClickViewDetail(record)}
-    //         ></Button>
-    //       </Tooltip>
-    //     </Space>
-    //   ),
-    // },
+    {
+      title: "",
+      dataIndex: "",
+      width: "1%",
+      render: (_, record) => (
+        <Tooltip title="Xem chi tiết">
+          <Button
+            type="primary"
+            ghost
+            icon={<InfoCircleOutlined />}
+            onClick={() => handleClickViewDetail(record)}
+          ></Button>
+        </Tooltip>
+      ),
+    },
   ];
 
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [visibleDetail, setVisibleDetail] = useState();
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [historyByStudent, setHistoryByStudent] = useState([]);
 
   useEffect(() => {
     getDataSource();
@@ -73,7 +77,22 @@ export const QlyHocSinh = () => {
     }
   };
 
-  // const handleClickViewDetail = (record) => {};
+  const handleClickViewDetail = async (record) => {
+    setVisibleDetail(true);
+
+    try {
+      setLoadingDetail(true);
+      const { data } = await apiClient.post(apis.get_test_history, {
+        user_id: record.id,
+        order_by: "date",
+      });
+      setHistoryByStudent(data);
+      setLoadingDetail(false);
+    } catch (error) {
+      setLoadingDetail(false);
+      console.log("get history data", error);
+    }
+  };
 
   return (
     <div>
@@ -86,6 +105,40 @@ export const QlyHocSinh = () => {
       </Row>
 
       <Table columns={columns} dataSource={dataSource} loading={loading} size="small" rowKey="id" />
+
+      <Modal
+        title="Chi tiết học sinh"
+        footer={null}
+        visible={visibleDetail}
+        onCancel={() => {
+          setVisibleDetail(false);
+          setHistoryByStudent([]);
+        }}
+      >
+        <Table
+          columns={historyCols}
+          dataSource={historyByStudent}
+          loading={loadingDetail}
+          size="small"
+          rowKey="id"
+        />
+      </Modal>
     </div>
   );
 };
+
+const historyCols = [
+  {
+    title: "Ngày làm bài",
+    dataIndex: "created_at",
+    render: (data) => moment(data).utcOffset("+14:00").format("DD/MM/YYYY HH:mm"),
+  },
+  {
+    title: "Bài thi",
+    dataIndex: "test",
+  },
+  {
+    title: "Điểm thi",
+    dataIndex: "score",
+  },
+];

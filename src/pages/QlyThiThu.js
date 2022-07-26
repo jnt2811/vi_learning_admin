@@ -3,9 +3,11 @@ import {
   EditOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
+  InfoCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Button, Tooltip, Popconfirm, Row, Space, Table, Tag, notification } from "antd";
+import { Button, Tooltip, Popconfirm, Row, Space, Table, Tag, notification, Modal } from "antd";
+import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 import { apis } from "../constants";
 import { apiClient } from "../helpers";
@@ -32,19 +34,19 @@ export const QlyThiThu = () => {
     },
     {
       title: "Số lượng câu hỏi",
-      dataIndex: "questions",
-      render: (data) => data?.length || 0,
+      dataIndex: "total_questions",
+      render: (data) => Number(data),
     },
-    // {
-    //   title: "Số lượng đã thi",
-    //   dataIndex: "quantity_competitors",
-    //   render: () => 0,
-    // },
-    // {
-    //   title: "Điểm TB",
-    //   dataIndex: "avg_score",
-    //   render: () => 0,
-    // },
+    {
+      title: "Số lượng thi",
+      dataIndex: "total_do_test",
+      render: (data) => Number(data),
+    },
+    {
+      title: "Điểm TB",
+      dataIndex: "average_score",
+      render: (data) => Number(data),
+    },
     {
       title: "Trạng thái",
       dataIndex: "active",
@@ -56,6 +58,14 @@ export const QlyThiThu = () => {
       width: "1%",
       render: (data, record) => (
         <Space>
+          <Tooltip title="Chi tiết">
+            <Button
+              icon={<InfoCircleOutlined />}
+              onClick={() => handleClickViewDetail(record)}
+              type="link"
+            ></Button>
+          </Tooltip>
+
           <Tooltip title="Chỉnh sửa">
             <Button
               icon={<EditOutlined />}
@@ -99,6 +109,27 @@ export const QlyThiThu = () => {
 
   console.log(dataSource);
 
+  const [visibleDetail, setVisibleDetail] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [historyByTest, setHistoryByTest] = useState([]);
+
+  const handleClickViewDetail = async (record) => {
+    setVisibleDetail(true);
+
+    try {
+      setLoadingDetail(true);
+      const { data } = await apiClient.post(apis.get_test_history, {
+        test_id: record.id,
+        order_by: "date",
+      });
+      setHistoryByTest(data);
+      setLoadingDetail(false);
+    } catch (error) {
+      setLoadingDetail(false);
+      console.log("get history data", error);
+    }
+  };
+
   return (
     <div>
       <Row align="middle" justify="space-between" style={{ marginBottom: 20 }}>
@@ -115,6 +146,24 @@ export const QlyThiThu = () => {
       <Table columns={columns} dataSource={dataSource} size="small" loading={loading} rowKey="id" />
 
       <CaiDatThiThu ref={ref} onSuccess={getDataSource} />
+
+      <Modal
+        title="Chi tiết bài thi"
+        footer={null}
+        visible={visibleDetail}
+        onCancel={() => {
+          setVisibleDetail(false);
+          setHistoryByTest([]);
+        }}
+      >
+        <Table
+          columns={historyCols}
+          dataSource={historyByTest}
+          loading={loadingDetail}
+          size="small"
+          rowKey="id"
+        />
+      </Modal>
     </div>
   );
 };
@@ -177,3 +226,19 @@ const DeleteButton = ({ record, onSuccess }) => {
     </Popconfirm>
   );
 };
+
+const historyCols = [
+  {
+    title: "Ngày làm bài",
+    dataIndex: "created_at",
+    render: (data) => moment(data).utcOffset("+14:00").format("DD/MM/YYYY HH:mm"),
+  },
+  {
+    title: "Học sinh",
+    dataIndex: "student",
+  },
+  {
+    title: "Điểm thi",
+    dataIndex: "score",
+  },
+];

@@ -13,8 +13,6 @@ export const apiClient = axios.create({
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    mode: "no-cors",
     Authorization: `Bearer ${getAccessToken()}`,
   },
 });
