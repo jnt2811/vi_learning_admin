@@ -8,8 +8,8 @@ export const getAccessToken = () => {
 };
 
 export const apiClient = axios.create({
-  // baseURL: "https://vi-learning-v2.herokuapp.com/api",
-  baseURL: "http://localhost:8088/api",
+  baseURL: "https://vi-learning-v2.herokuapp.com/api",
+  // baseURL: "http://localhost:8088/api",
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
