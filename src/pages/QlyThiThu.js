@@ -9,7 +9,8 @@ import {
 import { Button, Tooltip, Popconfirm, Row, Space, Table, Tag, notification, Modal } from "antd";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
-import { apis } from "../constants";
+import { apis, keys } from "../constants";
+import { useAuth } from "../contexts/AuthContext";
 import { apiClient } from "../helpers";
 import { CaiDatThiThu } from "./CaiDatThiThu";
 
@@ -84,6 +85,7 @@ export const QlyThiThu = () => {
   ];
 
   const ref = useRef();
+  const { currentUser } = useAuth();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -92,13 +94,16 @@ export const QlyThiThu = () => {
 
   useEffect(() => {
     getDataSource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getDataSource = async () => {
     setDataSource([]);
     try {
       setLoading(true);
-      const { data } = await apiClient.post(apis.get_all_tests);
+      let body = {};
+      if (currentUser?.role === keys.ROLE_TEACHER) body = { created_by: currentUser.id };
+      const { data } = await apiClient.post(apis.get_all_tests, body);
       setDataSource(data);
       setLoading(false);
     } catch (error) {

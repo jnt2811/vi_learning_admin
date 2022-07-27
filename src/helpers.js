@@ -8,11 +8,12 @@ export const getAccessToken = () => {
 };
 
 export const apiClient = axios.create({
-  baseURL: "https://vi-learning-v2.herokuapp.com/api",
-  // baseURL: "http://localhost:8088/api",
+  // baseURL: "https://vi-learning-v2.herokuapp.com/api",
+  baseURL: "http://localhost:8088/api",
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
     Authorization: `Bearer ${getAccessToken()}`,
   },
 });
@@ -51,4 +52,15 @@ export const getShortName = (name = "") => {
 export const isEmptyObj = (obj) => {
   if (typeof obj !== "object") return false;
   return Object.keys(obj).length === 0;
+};
+
+export const getBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = () => resolve(reader.result);
+
+    reader.onerror = (error) => reject(error);
+  });
 };

@@ -10,19 +10,19 @@ import {
   DatePicker,
   notification,
   Checkbox,
-  Upload,
 } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { apis, keys } from "../constants";
 import { apiClient } from "../helpers";
 import moment from "moment";
-import { PlusOutlined } from "@ant-design/icons";
+import { UploadImage } from "../components";
 
 export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
   const [currentData, setCurrentData] = useState();
   const [visible, setVisible] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form] = Form.useForm();
+  const [image, setImage] = useState("");
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -42,6 +42,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
     setLoadingSubmit(false);
     setCurrentData();
     form.resetFields();
+    setImage("");
   };
 
   const initData = (data) => {
@@ -52,11 +53,16 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
         return { name, value };
       })
     );
+    setImage(data.avatar);
   };
 
   const onFinish = (values) => {
-    console.log(values);
+    if (!image) {
+      return notification.error({ message: "Chưa tải ảnh lên!", placement: "bottomLeft" });
+    }
+    values.avatar = image;
     values.dob = values.dob.format("DD/MM/YYYY");
+    console.log(values);
     if (currentData) chinhSuaGiaoVien(values);
     else themMoiGiaoVien(values);
   };
@@ -112,12 +118,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
     >
       <Row justify="center">
         <Col>
-          <Upload maxCount={1} listType="picture-card" showUploadList={false}>
-            <div>
-              <PlusOutlined />
-              <div>Tải ảnh lên</div>
-            </div>
-          </Upload>
+          <UploadImage image={image} setImage={setImage} />
         </Col>
       </Row>
 

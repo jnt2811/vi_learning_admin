@@ -7,7 +7,8 @@ import {
 } from "@ant-design/icons";
 import { Button, Tooltip, Popconfirm, Row, Space, Table, Tag, notification } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { apis } from "../constants";
+import { apis, keys } from "../constants";
+import { useAuth } from "../contexts/AuthContext";
 import { apiClient } from "../helpers";
 import { CaiDatKhoaHoc } from "./CaiDatKhoaHoc";
 
@@ -57,19 +58,23 @@ export const QlyKhoaHoc = () => {
   const ref = useRef();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { currentUser } = useAuth();
 
   const handleClickThemMoi = () => ref.current?.open();
   const handleClickChinhSua = (record) => ref.current?.open(record);
 
   useEffect(() => {
     getDataSource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getDataSource = async () => {
     setDataSource([]);
     try {
       setLoading(true);
-      const { data } = await apiClient.post(apis.get_all_courses);
+      let body = {};
+      if (currentUser?.role === keys.ROLE_TEACHER) body = { created_by: currentUser.id };
+      const { data } = await apiClient.post(apis.get_all_courses, body);
       setDataSource(data);
       setLoading(false);
     } catch (error) {

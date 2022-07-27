@@ -1,6 +1,6 @@
-import { PlusOutlined } from "@ant-design/icons";
-import { Drawer, Row, Space, Button, Input, Form, notification, Col, Upload } from "antd";
+import { Drawer, Row, Space, Button, Input, Form, notification, Col } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
+import { UploadImage } from "../components";
 import { apis } from "../constants";
 import { apiClient } from "../helpers";
 
@@ -9,6 +9,7 @@ export const CaiDatAudio = forwardRef(({ onSuccess }, ref) => {
   const [visible, setVisible] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form] = Form.useForm();
+  const [image, setImage] = useState("");
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -27,6 +28,7 @@ export const CaiDatAudio = forwardRef(({ onSuccess }, ref) => {
     setLoadingSubmit(false);
     setCurrentData();
     form.resetFields();
+    setImage("");
   };
 
   const initData = (data) => {
@@ -36,9 +38,14 @@ export const CaiDatAudio = forwardRef(({ onSuccess }, ref) => {
         value: data[name],
       }))
     );
+    setImage(data.thumbnail);
   };
 
   const handleUpdateAudio = async (values) => {
+    if (!image) {
+      return notification.error({ message: "Chưa tải ảnh lên!", placement: "bottomLeft" });
+    }
+    values.thumbnail = image;
     setLoadingSubmit(true);
     if (!currentData) themMoiAudio(values);
     else chinhSuaAudio(values);
@@ -95,12 +102,7 @@ export const CaiDatAudio = forwardRef(({ onSuccess }, ref) => {
     >
       <Row justify="center">
         <Col>
-          <Upload maxCount={1} listType="picture-card" showUploadList={false}>
-            <div>
-              <PlusOutlined />
-              <div>Tải ảnh lên</div>
-            </div>
-          </Upload>
+          <UploadImage image={image} setImage={setImage} />
         </Col>
       </Row>
 

@@ -9,17 +9,14 @@ import {
   Input,
   Radio,
   Divider,
-  Upload,
   Form,
   notification,
 } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { apis } from "../constants";
 import { apiClient } from "../helpers";
+import { UploadImage } from "../components";
 import { useAuth } from "../contexts/AuthContext";
-
-const sample_thumbnail =
-  "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fGxlYXJuaW5nfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=900&q=60";
 
 export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   const columns = [
@@ -65,6 +62,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   const [dsBaiHoc, setDsBaiHoc] = useState([]);
   const [loadingLessonList, setLoadingLessonList] = useState(false);
   const { currentUser } = useAuth();
+  const [image, setImage] = useState("");
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -85,6 +83,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
     setCurrentData();
     formInfoKhoaHoc.resetFields();
     formThemBaihoc.resetFields();
+    setImage("");
   };
 
   const initData = (data) => {
@@ -95,6 +94,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
       }))
     );
     getLessonList(data.id);
+    setImage(data.thumbnail);
   };
 
   const getLessonList = async (id) => {
@@ -110,6 +110,10 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   };
 
   const handleUpdateKhoaHoc = async (values) => {
+    if (!image) {
+      return notification.error({ message: "Chưa tải ảnh lên!", placement: "bottomLeft" });
+    }
+    values.thumbnail = image;
     setLoadingSubmit(true);
     if (!currentData) themMoiKhoaHoc(values);
     else chinhSuaKhoaHoc(values);
@@ -121,7 +125,6 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
         ...values,
         lessons: dsBaiHoc,
       };
-      data.thumbnail = sample_thumbnail;
       data.created_by = currentUser?.id;
       await apiClient.post(apis.add_new_course, data);
       notification.success({ message: "Thêm mới thành công" });
@@ -140,7 +143,6 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
         ...values,
         lessons: dsBaiHoc,
       };
-      data.thumbnail = sample_thumbnail;
       data.id = currentData.id;
       await apiClient.post(apis.update_course, data);
       notification.success({ message: "Chỉnh sửa thành công" });
@@ -218,12 +220,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Col>
 
         <Col>
-          <Upload maxCount={1} listType="picture-card" showUploadList={false}>
-            <div>
-              <PlusOutlined />
-              <div>Tải ảnh lên</div>
-            </div>
-          </Upload>
+          <UploadImage image={image} setImage={setImage} />
         </Col>
       </Row>
 

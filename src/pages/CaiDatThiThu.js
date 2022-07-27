@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import {
   Drawer,
   Row,
@@ -9,7 +9,6 @@ import {
   Input,
   Radio,
   Divider,
-  Upload,
   Form,
   notification,
   Select,
@@ -21,28 +20,17 @@ import { apis } from "../constants";
 import { apiClient } from "../helpers";
 import { useAuth } from "../contexts/AuthContext";
 import { CaiDatCauHoi } from "./CaiDatCauHoi";
+import { UploadImage } from "../components";
 
 export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
+  const [image, setImage] = useState("");
+
   const columns = [
     {
       title: "Tên câu hỏi",
       dataIndex: "name",
       render: (data) => <div dangerouslySetInnerHTML={{ __html: data }} />,
     },
-    // {
-    //   title: "Link video",
-    //   dataIndex: "link",
-    //   render: (data) => (
-    //     <a href={data} target="_blank" rel="noreferrer">
-    //       {data}
-    //     </a>
-    //   ),
-    // },
-    // {
-    //   title: "Mô tả",
-    //   dataIndex: "description",
-    //   ellipsis: true,
-    // },
     {
       title: "",
       dataIndex: "",
@@ -100,6 +88,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
     setDsCauHoi([]);
     setCurrentData();
     form.resetFields();
+    setImage("");
   };
 
   const initData = (data) => {
@@ -110,6 +99,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
       }))
     );
     getQuestionList(data.id);
+    setImage(data.thumbnail);
   };
 
   const getQuestionList = async (id) => {
@@ -148,6 +138,10 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
   };
 
   const handleUpdateBaiThi = async (values) => {
+    if (!image) {
+      return notification.error({ message: "Chưa tải ảnh lên!", placement: "bottomLeft" });
+    }
+    values.thumbnail = image;
     setLoadingSubmit(true);
     if (!currentData) themMoiBaiThi(values);
     else chinhSuaBaiThi(values);
@@ -298,12 +292,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Col>
 
         <Col>
-          <Upload maxCount={1} listType="picture-card" showUploadList={false}>
-            <div>
-              <PlusOutlined />
-              <div>Tải ảnh lên</div>
-            </div>
-          </Upload>
+          <UploadImage image={image} setImage={setImage} />
         </Col>
       </Row>
 

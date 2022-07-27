@@ -1,14 +1,16 @@
-import { PlusOutlined } from "@ant-design/icons";
-import { Drawer, Row, Space, Button, Input, Form, notification, Col, Upload } from "antd";
+import { Drawer, Row, Space, Button, Input, Form, notification, Col } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { apis } from "../constants";
 import { apiClient } from "../helpers";
+import { UploadGallery } from "../components";
+import { nanoid } from "nanoid";
 
 export const CaiDatSach = forwardRef(({ onSuccess }, ref) => {
   const [currentData, setCurrentData] = useState();
   const [visible, setVisible] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form] = Form.useForm();
+  const [imageList, setImageList] = useState([]);
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -27,6 +29,7 @@ export const CaiDatSach = forwardRef(({ onSuccess }, ref) => {
     setLoadingSubmit(false);
     setCurrentData();
     form.resetFields();
+    setImageList([]);
   };
 
   const initData = (data) => {
@@ -36,9 +39,27 @@ export const CaiDatSach = forwardRef(({ onSuccess }, ref) => {
         value: data[name],
       }))
     );
+    if (!!data.gallery) {
+      try {
+        let gallery = JSON.parse(data.gallery);
+        gallery = gallery?.map((item) => ({
+          thumbUrl: item,
+          uid: nanoid(20),
+        }));
+        console.log("gallery", gallery);
+        setImageList(gallery);
+      } catch (error) {
+        console.log(error);
+      }
+    }
   };
 
   const handleUpdateSach = async (values) => {
+    if (imageList.length === 0 || imageList.length > 2) {
+      return notification.error({ message: "Tải 2 ảnh lên!", placement: "bottomLeft" });
+    }
+    values.gallery = JSON.stringify(imageList.map((item) => item.thumbUrl));
+    console.log(values);
     setLoadingSubmit(true);
     if (!currentData) themMoiSach(values);
     else chinhSuaSach(values);
@@ -106,12 +127,7 @@ export const CaiDatSach = forwardRef(({ onSuccess }, ref) => {
       <label>Bộ sưu tập ảnh</label>
       <Row style={{ marginTop: 10 }}>
         <Col>
-          <Upload maxCount={1} listType="picture-card" showUploadList={false}>
-            <div>
-              <PlusOutlined />
-              <div>Tải ảnh lên</div>
-            </div>
-          </Upload>
+          <UploadGallery fileList={imageList} setFileList={setImageList} />
         </Col>
       </Row>
     </Drawer>
