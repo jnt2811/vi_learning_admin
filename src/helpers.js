@@ -1,6 +1,9 @@
 import { notification } from "antd";
 import axios from "axios";
 import { keys } from "./constants";
+import { storage } from "./firebase";
+import { nanoid } from "nanoid";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export const getAccessToken = () => {
   // console.log(localStorage.getItem(keys.ACCESS_TOKEN));
@@ -63,4 +66,14 @@ export const getBase64 = (file) => {
 
     reader.onerror = (error) => reject(error);
   });
+};
+
+export const uploadFile = async (file) => {
+  try {
+    const fileRef = ref(storage, `images/${nanoid(5)}.png`);
+    await uploadBytes(fileRef, file);
+    return await getDownloadURL(fileRef);
+  } catch (error) {
+    console.log(error);
+  }
 };

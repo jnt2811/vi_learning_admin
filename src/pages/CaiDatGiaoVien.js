@@ -13,7 +13,7 @@ import {
 } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { apis, keys } from "../constants";
-import { apiClient } from "../helpers";
+import { apiClient, uploadFile } from "../helpers";
 import moment from "moment";
 import { UploadImage } from "../components";
 
@@ -23,6 +23,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form] = Form.useForm();
   const [image, setImage] = useState("");
+  const [fileImage, setFileImage] = useState();
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -43,6 +44,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
     setCurrentData();
     form.resetFields();
     setImage("");
+    setFileImage();
   };
 
   const initData = (data) => {
@@ -56,20 +58,36 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
     setImage(data.avatar);
   };
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     if (!image) {
       return notification.error({ message: "Chưa tải ảnh lên!", placement: "bottomLeft" });
     }
+
     values.avatar = image;
+
+    setLoadingSubmit(true);
+
+    if (fileImage) {
+      const url = await uploadFile(fileImage);
+
+      if (url) {
+        values.avatar = url;
+      } else {
+        setLoadingSubmit(false);
+        return notification.error({ message: "Lỗi lưu ảnh!", placement: "bottomLeft" });
+      }
+    }
+
     values.dob = values.dob.format("DD/MM/YYYY");
+
     console.log(values);
+
     if (currentData) chinhSuaGiaoVien(values);
     else themMoiGiaoVien(values);
   };
 
   const themMoiGiaoVien = async (values) => {
     try {
-      setLoadingSubmit(true);
       values.role = keys.ROLE_TEACHER;
       await apiClient.post(apis.add_new_user, values);
       notification.success({ message: "Thêm mới thành công" });
@@ -84,7 +102,6 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
 
   const chinhSuaGiaoVien = async (values) => {
     try {
-      setLoadingSubmit(true);
       values.id = currentData.id;
       await apiClient.post(apis.update_user, values);
       notification.success({ message: "Chỉnh sửa thành công" });
@@ -118,7 +135,7 @@ export const CaiDatGiaoVien = forwardRef(({ onSuccess = () => {} }, ref) => {
     >
       <Row justify="center">
         <Col>
-          <UploadImage image={image} setImage={setImage} />
+          <UploadImage image={image} setImage={setImage} setFileImage={setFileImage} />
         </Col>
       </Row>
 

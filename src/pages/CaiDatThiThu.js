@@ -17,14 +17,12 @@ import {
 import { nanoid } from "nanoid";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { apis } from "../constants";
-import { apiClient } from "../helpers";
+import { apiClient, uploadFile } from "../helpers";
 import { useAuth } from "../contexts/AuthContext";
 import { CaiDatCauHoi } from "./CaiDatCauHoi";
 import { UploadImage } from "../components";
 
 export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
-  const [image, setImage] = useState("");
-
   const columns = [
     {
       title: "Tên câu hỏi",
@@ -69,6 +67,8 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
   const [dsCauHoi, setDsCauHoi] = useState([]);
   const [loadingQuestionList, setLoadingQuestionList] = useState(false);
   const { currentUser } = useAuth();
+  const [image, setImage] = useState("");
+  const [fileImage, setFileImage] = useState();
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -89,6 +89,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
     setCurrentData();
     form.resetFields();
     setImage("");
+    setFileImage();
   };
 
   const initData = (data) => {
@@ -141,8 +142,24 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
     if (!image) {
       return notification.error({ message: "Chưa tải ảnh lên!", placement: "bottomLeft" });
     }
-    values.thumbnail = image;
+
     setLoadingSubmit(true);
+
+    values.thumbnail = image;
+
+    if (fileImage) {
+      const url = await uploadFile(fileImage);
+
+      if (url) {
+        values.thumbnail = url;
+      } else {
+        setLoadingSubmit(false);
+        return notification.error({ message: "Lỗi lưu ảnh!", placement: "bottomLeft" });
+      }
+    }
+
+    console.log(values);
+
     if (!currentData) themMoiBaiThi(values);
     else chinhSuaBaiThi(values);
   };
@@ -292,7 +309,7 @@ export const CaiDatThiThu = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Col>
 
         <Col>
-          <UploadImage image={image} setImage={setImage} />
+          <UploadImage image={image} setImage={setImage} setFileImage={setFileImage} />
         </Col>
       </Row>
 

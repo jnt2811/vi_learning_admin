@@ -1,7 +1,7 @@
 export const apis = {
   login: "/public/user/login",
   get_all_users: "/resources/user/get_users",
-  add_new_user: "/resources/user/add_user",
+  add_new_user: "/public/user/add_user",
   update_user: "/resources/user/edit_user",
   get_all_courses: "/public/course/get_courses",
   add_new_course: "/resources/course/add_course",

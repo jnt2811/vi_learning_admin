@@ -2,7 +2,7 @@ import { Drawer, Row, Space, Button, Input, Form, notification, Col } from "antd
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { UploadImage } from "../components";
 import { apis } from "../constants";
-import { apiClient } from "../helpers";
+import { apiClient, uploadFile } from "../helpers";
 
 export const CaiDatAudio = forwardRef(({ onSuccess }, ref) => {
   const [currentData, setCurrentData] = useState();
@@ -10,6 +10,7 @@ export const CaiDatAudio = forwardRef(({ onSuccess }, ref) => {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form] = Form.useForm();
   const [image, setImage] = useState("");
+  const [fileImage, setFileImage] = useState();
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -29,6 +30,7 @@ export const CaiDatAudio = forwardRef(({ onSuccess }, ref) => {
     setCurrentData();
     form.resetFields();
     setImage("");
+    setFileImage();
   };
 
   const initData = (data) => {
@@ -45,8 +47,22 @@ export const CaiDatAudio = forwardRef(({ onSuccess }, ref) => {
     if (!image) {
       return notification.error({ message: "Chưa tải ảnh lên!", placement: "bottomLeft" });
     }
-    values.thumbnail = image;
     setLoadingSubmit(true);
+    values.thumbnail = image;
+
+    if (fileImage) {
+      const url = await uploadFile(fileImage);
+
+      if (url) {
+        values.thumbnail = url;
+      } else {
+        setLoadingSubmit(false);
+        return notification.error({ message: "Lỗi lưu ảnh!", placement: "bottomLeft" });
+      }
+    }
+
+    console.log(values);
+
     if (!currentData) themMoiAudio(values);
     else chinhSuaAudio(values);
   };
@@ -102,7 +118,7 @@ export const CaiDatAudio = forwardRef(({ onSuccess }, ref) => {
     >
       <Row justify="center">
         <Col>
-          <UploadImage image={image} setImage={setImage} />
+          <UploadImage image={image} setImage={setImage} setFileImage={setFileImage} />
         </Col>
       </Row>
 

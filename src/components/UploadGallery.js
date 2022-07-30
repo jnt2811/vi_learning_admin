@@ -3,7 +3,11 @@ import { Image, Modal, notification, Upload } from "antd";
 import React, { useState } from "react";
 import { getBase64 } from "../helpers";
 
-export const UploadGallery = ({ fileList = [], setFileList = () => {} }) => {
+export const UploadGallery = ({
+  fileList = [],
+  setFileList = () => {},
+  setFileImages = () => {},
+}) => {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
@@ -31,11 +35,17 @@ export const UploadGallery = ({ fileList = [], setFileList = () => {} }) => {
       });
     }
 
-    file.thumbUrl = await getBase64(file);
+    try {
+      file.thumbUrl = await getBase64(file);
 
-    console.log("file upload", file, fileList);
+      console.log("file upload", file, fileList);
 
-    setFileList((arr) => [...arr, file]);
+      setFileList((arr) => [...arr, file]);
+      setFileImages((arr) => [...arr, file]);
+    } catch (error) {
+      console.log(error);
+    }
+
     return false;
   };
 
@@ -60,7 +70,7 @@ export const UploadGallery = ({ fileList = [], setFileList = () => {} }) => {
         onRemove={handleRemove}
         multiple
       >
-        {fileList.length < 2 && uploadButton}
+        {uploadButton}
       </Upload>
 
       <Modal visible={previewVisible} title="Preview Image" footer={null} onCancel={handleCancel}>

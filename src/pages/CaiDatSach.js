@@ -1,7 +1,7 @@
 import { Drawer, Row, Space, Button, Input, Form, notification, Col } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { apis } from "../constants";
-import { apiClient } from "../helpers";
+import { apiClient, uploadFile } from "../helpers";
 import { UploadGallery } from "../components";
 import { nanoid } from "nanoid";
 
@@ -11,6 +11,7 @@ export const CaiDatSach = forwardRef(({ onSuccess }, ref) => {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form] = Form.useForm();
   const [imageList, setImageList] = useState([]);
+  const [fileImages, setFileImages] = useState([]);
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -30,6 +31,7 @@ export const CaiDatSach = forwardRef(({ onSuccess }, ref) => {
     setCurrentData();
     form.resetFields();
     setImageList([]);
+    setFileImages([]);
   };
 
   const initData = (data) => {
@@ -55,12 +57,22 @@ export const CaiDatSach = forwardRef(({ onSuccess }, ref) => {
   };
 
   const handleUpdateSach = async (values) => {
-    if (imageList.length === 0 || imageList.length > 2) {
-      return notification.error({ message: "Tải 2 ảnh lên!", placement: "bottomLeft" });
+    if (imageList.length === 0) {
+      return notification.error({ message: "Cần tải lên ít nhất 1 ảnh!", placement: "bottomLeft" });
     }
-    values.gallery = JSON.stringify(imageList.map((item) => item.thumbUrl));
-    console.log(values);
+
     setLoadingSubmit(true);
+
+    let arr = [];
+
+    if (fileImages.length > 0) {
+      const responses = await Promise.all(fileImages.map((fileImage) => uploadFile(fileImage)));
+      arr = responses;
+    }
+
+    values.gallery = JSON.stringify(arr);
+
+    console.log(values);
     if (!currentData) themMoiSach(values);
     else chinhSuaSach(values);
   };
@@ -127,7 +139,11 @@ export const CaiDatSach = forwardRef(({ onSuccess }, ref) => {
       <label>Bộ sưu tập ảnh</label>
       <Row style={{ marginTop: 10 }}>
         <Col>
-          <UploadGallery fileList={imageList} setFileList={setImageList} />
+          <UploadGallery
+            fileList={imageList}
+            setFileList={setImageList}
+            setFileImages={setFileImages}
+          />
         </Col>
       </Row>
     </Drawer>

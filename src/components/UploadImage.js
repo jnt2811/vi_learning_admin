@@ -3,7 +3,7 @@ import { notification, Upload } from "antd";
 import React from "react";
 import { getBase64 } from "../helpers";
 
-export const UploadImage = ({ image = "", setImage = () => {} }) => {
+export const UploadImage = ({ image = "", setImage = () => {}, setFileImage = () => {} }) => {
   const beforeUpload = async (file) => {
     const isImage = file.type.includes("image/");
 
@@ -26,6 +26,7 @@ export const UploadImage = ({ image = "", setImage = () => {} }) => {
     try {
       const url = await getBase64(file);
       setImage(url);
+      setFileImage(file);
     } catch (error) {
       console.log(error);
     }

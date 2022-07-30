@@ -14,7 +14,7 @@ import {
 } from "antd";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { apis } from "../constants";
-import { apiClient } from "../helpers";
+import { apiClient, uploadFile } from "../helpers";
 import { UploadImage } from "../components";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -63,6 +63,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   const [loadingLessonList, setLoadingLessonList] = useState(false);
   const { currentUser } = useAuth();
   const [image, setImage] = useState("");
+  const [fileImage, setFileImage] = useState();
 
   useImperativeHandle(ref, () => ({
     open: handleOpen,
@@ -84,6 +85,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
     formInfoKhoaHoc.resetFields();
     formThemBaihoc.resetFields();
     setImage("");
+    setFileImage();
   };
 
   const initData = (data) => {
@@ -113,8 +115,24 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
     if (!image) {
       return notification.error({ message: "Chưa tải ảnh lên!", placement: "bottomLeft" });
     }
-    values.thumbnail = image;
+
     setLoadingSubmit(true);
+
+    values.thumbnail = image;
+
+    if (fileImage) {
+      const url = await uploadFile(fileImage);
+
+      if (url) {
+        values.thumbnail = url;
+      } else {
+        setLoadingSubmit(false);
+        return notification.error({ message: "Lỗi lưu ảnh!", placement: "bottomLeft" });
+      }
+    }
+
+    console.log("[INFO] lưu khóa học", values);
+
     if (!currentData) themMoiKhoaHoc(values);
     else chinhSuaKhoaHoc(values);
   };
@@ -220,7 +238,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
         </Col>
 
         <Col>
-          <UploadImage image={image} setImage={setImage} />
+          <UploadImage image={image} setImage={setImage} setFileImage={setFileImage} />
         </Col>
       </Row>
 
