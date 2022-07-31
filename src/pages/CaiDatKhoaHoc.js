@@ -1,4 +1,4 @@
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, DownOutlined, PlusOutlined, UpOutlined } from "@ant-design/icons";
 import {
   Drawer,
   Row,
@@ -20,6 +20,33 @@ import { useAuth } from "../contexts/AuthContext";
 
 export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
   const columns = [
+    {
+      title: "Sắp xếp",
+      width: 100,
+      render: (_, record, index) => (
+        <Space>
+          <Button
+            icon={<UpOutlined />}
+            type="primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSapXepBaiHoc(index, "up");
+            }}
+            disabled={index === 0}
+          ></Button>
+
+          <Button
+            icon={<DownOutlined />}
+            type="primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSapXepBaiHoc(index, "down");
+            }}
+            disabled={index === dsBaiHoc.length - 1}
+          ></Button>
+        </Space>
+      ),
+    },
     {
       title: "Tên bài học",
       dataIndex: "name",
@@ -45,6 +72,7 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
         <Button
           icon={<DeleteOutlined />}
           type="primary"
+          danger
           onClick={(e) => {
             e.stopPropagation();
             handleXoaBaihoc(record);
@@ -111,9 +139,32 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
     }
   };
 
+  const handleSapXepBaiHoc = (index, action) => {
+    const currentItem = dsBaiHoc[index];
+    let arrItems = [...dsBaiHoc];
+
+    if (action === "up") {
+      const formerItem = dsBaiHoc[index - 1];
+
+      arrItems[index] = formerItem;
+      arrItems[index - 1] = currentItem;
+    } else if (action === "down") {
+      const latterItem = dsBaiHoc[index + 1];
+
+      arrItems[index] = latterItem;
+      arrItems[index + 1] = currentItem;
+    }
+
+    setDsBaiHoc(arrItems);
+  };
+
   const handleUpdateKhoaHoc = async (values) => {
     if (!image) {
       return notification.error({ message: "Chưa tải ảnh lên!", placement: "bottomLeft" });
+    }
+
+    if (dsBaiHoc.length === 0) {
+      return notification.error({ message: "Chưa thêm khóa học!", placement: "bottomLeft" });
     }
 
     setLoadingSubmit(true);
@@ -131,18 +182,16 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
       }
     }
 
+    values.lessons = dsBaiHoc.map((item, index) => ({ ...item, order_number: index + 1 }));
+
     console.log("[INFO] lưu khóa học", values);
 
     if (!currentData) themMoiKhoaHoc(values);
     else chinhSuaKhoaHoc(values);
   };
 
-  const themMoiKhoaHoc = async (values) => {
+  const themMoiKhoaHoc = async (data) => {
     try {
-      const data = {
-        ...values,
-        lessons: dsBaiHoc,
-      };
       data.created_by = currentUser?.id;
       await apiClient.post(apis.add_new_course, data);
       notification.success({ message: "Thêm mới thành công" });
@@ -155,12 +204,8 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
     }
   };
 
-  const chinhSuaKhoaHoc = async (values) => {
+  const chinhSuaKhoaHoc = async (data) => {
     try {
-      const data = {
-        ...values,
-        lessons: dsBaiHoc,
-      };
       data.id = currentData.id;
       await apiClient.post(apis.update_course, data);
       notification.success({ message: "Chỉnh sửa thành công" });
@@ -287,6 +332,8 @@ export const CaiDatKhoaHoc = forwardRef(({ onSuccess = () => {} }, ref) => {
         size="small"
         rowKey="name"
         loading={loadingLessonList}
+        pagination={false}
+        scroll={{ y: "calc(100vh - 500px)" }}
       />
     </Drawer>
   );
